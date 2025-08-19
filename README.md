@@ -59,6 +59,19 @@ A full-stack Spring Boot + React application for sharing your favorite Wiz Khali
 - Access to a remote MongoDB instance
 - (Optional) Kubernetes cluster for deployment
 
+## Running with Docker (nginx + Spring Boot)
+
+After building your Docker image, run:
+
+```
+docker run -p 80:80 -p 8080:8080 <your-image-name>
+```
+
+- Access the React UI at: [http://localhost/](http://localhost/)
+- Access the backend API at: [http://localhost:8080/](http://localhost:8080/)
+
+The image now serves the frontend using nginx on port 80 and the backend on port 8080.
+
 
 ## Local Development & Testing
 

@@ -12,3 +12,6 @@ frontend/node_modules/
 
 # Ignore all JAR files
 *.jar
+
+# Ignore VS Code settings folder
+.vscode/
