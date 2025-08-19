@@ -1,2 +1,8 @@
 # Ignore macOS system files
 .DS_Store
+
+# Ignore frontend build output
+frontend/build/
+
+# Ignore frontend node modules
+frontend/node_modules/

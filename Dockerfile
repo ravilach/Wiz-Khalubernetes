@@ -6,10 +6,9 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/yarn.lock* ./
 # Install dependencies
 RUN npm install --legacy-peer-deps
-# Copy only src and public folders, plus any config files needed for build
+# Copy only src and public folders needed for build
 COPY frontend/src ./src
 COPY frontend/public ./public
-COPY frontend/tsconfig.json ./tsconfig.json
 # Build the frontend
 RUN npm run build
 

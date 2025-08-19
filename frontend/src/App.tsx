@@ -42,7 +42,9 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    axios.get('/api/nodeinfo').then((res: { data: any }) => setNodeInfo(res.data));
+    axios.get('/api/nodeinfo')
+      .then((res: { data: any }) => setNodeInfo(res.data))
+      .catch(() => setNodeInfo(null));
     axios.get('/api/quotes/latest')
       .then((res: { data: any }) => {
         if (res.data && !(res.data as any).error) {
@@ -110,7 +112,9 @@ const App: React.FC = () => {
       </form>
       {error && (
         <div style={{ color: '#ffbaba', background: '#d8000c', padding: 12, borderRadius: 8, marginTop: 8, fontWeight: 500 }}>
-          {error}
+          {error === 'Could not connect to backend or MongoDB.'
+            ? 'Database connection unavailable. Please check your MongoDB settings.'
+            : error}
         </div>
       )}
       {submittedQuote && (
@@ -150,7 +154,9 @@ const App: React.FC = () => {
             <div><strong>Timestamp:</strong> {nodeInfo.timestamp}</div>
           </div>
         ) : (
-          <div style={{ color: '#fff', opacity: 0.7 }}>Loading node info...</div>
+          <div style={{ color: '#fff', opacity: 0.7 }}>
+            Unable to load node info. Backend or database may be unavailable.
+          </div>
         )}
       </footer>
     </div>
