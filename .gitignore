@@ -6,3 +6,6 @@ frontend/build/
 
 # Ignore frontend node modules
 frontend/node_modules/
+
+# Ignore all Java class files
+*.class

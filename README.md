@@ -96,11 +96,20 @@ docker run -p 8080:8080 \
    wiz-khalubernetes
 ```
 
+
 #### Without a MongoDB cluster (quick test)
 You can run the app without a MongoDB connection. The app will load, but quote submission will show a friendly error message in the UI indicating the database is unavailable.
 ```
 docker run -p 8080:8080 wiz-khalubernetes
 ```
+
+#### Accessing the App in Your Browser
+After running the container, open your browser and go to:
+
+```
+http://localhost:8080
+```
+You should see the Wiz Khalubernetes app homepage. If MongoDB is not available, quote submission will show a friendly error message.
 
 
 ### 2a. Local Frontend (NPM) Testing
