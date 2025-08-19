@@ -69,7 +69,7 @@ docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
 # docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=false wiz-khalubernetes
 
 # For remote MongoDB
-# Example: no auth, using IP address
+# Example: no auth, using IP address and DB name 'wizquotes'
 # docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=true -e MONGODB_URI="mongodb://192.168.1.100:27017/wizquotes" wiz-khalubernetes
 ```
 - Access frontend: [http://localhost](http://localhost) (served by nginx on port 80)
@@ -86,12 +86,12 @@ docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
 - **Remote MongoDB:**
    - In `backend/src/main/resources/application.properties`, uncomment the line:
       ```properties
-      spring.data.mongodb.uri=${MONGODB_URI:mongodb://localhost:27017/dummy}
+      spring.data.mongodb.uri=${MONGODB_URI:mongodb://localhost:27017/wizquotes}
       # Uncomment this property to use MongoDB (remote or local). Leave commented to use embedded H2 for local/dev.
       ```
    - Or set as environment variable:
       ```sh
-      export SPRING_DATA_MONGODB_URI="mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin"
+      export SPRING_DATA_MONGODB_URI="mongodb://<username>:<password>@<host>:27017/wizquotes?authSource=admin"
       ```
    - Example for EC2:
       ```properties
