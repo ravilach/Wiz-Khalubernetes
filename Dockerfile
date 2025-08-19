@@ -37,7 +37,7 @@ COPY --from=base /app/wizexercise.txt /usr/share/nginx/html/wizexercise.txt
 FROM base AS final
 WORKDIR /app
 COPY --from=frontend-server /usr/share/nginx/html /app/frontend/build
-RUN apk add --no-cache nginx
+RUN apt-get update && apt-get install -y nginx
 COPY --from=frontend-server /etc/nginx /etc/nginx
 EXPOSE 8080 80
 ENV SPRING_PROFILES_ACTIVE=prod

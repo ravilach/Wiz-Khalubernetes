@@ -70,7 +70,15 @@ docker run -p 80:80 -p 8080:8080 <your-image-name>
 - Access the React UI at: [http://localhost/](http://localhost/)
 - Access the backend API at: [http://localhost:8080/](http://localhost:8080/)
 
-The image now serves the frontend using nginx on port 80 and the backend on port 8080.
+
+## Accessing the App in Your Browser
+
+Once your Docker container is running, open your browser and go to:
+
+- **React UI:** [http://localhost/](http://localhost/)
+- **Backend API:** [http://localhost:8080/](http://localhost:8080/)
+
+The React UI is served on port 80 by nginx, and the backend API is available on port 8080.
 
 
 ## Local Development & Testing
