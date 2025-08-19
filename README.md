@@ -11,244 +11,152 @@ This project includes a sample GitHub Actions workflow to build and push the Doc
 
 Sample Terraform configuration is provided in the `terraform/` folder to create an Amazon EC2 instance and install MongoDB.
 
-1. Install [Terraform](https://www.terraform.io/downloads.html).
-2. Configure your AWS credentials:
-    - You can set them in `terraform/terraform.tfvars` as `aws_access_key` and `aws_secret_key` (not recommended for production).
-    - Or, set them as environment variables before running Terraform:
-       ```sh
-       export AWS_ACCESS_KEY_ID=your-access-key
-       export AWS_SECRET_ACCESS_KEY=your-secret-key
-       export AWS_DEFAULT_REGION=us-east-1
-       ```
-3. Edit `terraform/main.tf` to set your key name, region, and AMI, or use `terraform.tfvars`.
-4. Initialize and apply Terraform:
-   ```sh
-   cd terraform
-   terraform init
-   terraform apply
-   ```
-5. After provisioning, use the output `ec2_public_ip` to connect your app to MongoDB:
-   ```
-   mongodb://<username>:<password>@<ec2_public_ip>:27017/<database>?authSource=admin
-   ```
-## API Endpoints (on EKS)
 
-Assuming your app is exposed at `http://<EXTERNAL-IP>` via the LoadBalancer service:
 
-| Endpoint                      | Method | Description                                 | Example URL                                 |
-|-------------------------------|--------|---------------------------------------------|---------------------------------------------|
-| `/api/quotes`                 | POST   | Submit a new Wiz Khalifa quote              | `http://<EXTERNAL-IP>/api/quotes`           |
-| `/api/quotes/latest`          | GET    | Get the latest quote                        | `http://<EXTERNAL-IP>/api/quotes/latest`    |
-| `/api/nodeinfo`               | GET    | Get node/system/application info            | `http://<EXTERNAL-IP>/api/nodeinfo`         |
-| `/actuator/prometheus`        | GET    | Prometheus metrics endpoint                 | `http://<EXTERNAL-IP>/actuator/prometheus`  |
-
-Replace `<EXTERNAL-IP>` with the public IP from your LoadBalancer service.
 # Wiz Khalubernetes
 
-A full-stack Spring Boot + React application for sharing your favorite Wiz Khalifa quotes, designed for Kubernetes deployment.
+A full-stack Spring Boot + React app for sharing Wiz Khalifa quotes, designed for cloud-native deployment and flexible database options.
 
-## Features
-- Enter and display Wiz Khalifa quotes
-- Stores quote, timestamp, IP address, and quote number in MongoDB
-- Node/application info displayed on the page
-- Prometheus metrics endpoint
-- Ready for Kubernetes deployment
+---
 
-## Prerequisites
-- Docker
-- Access to a remote MongoDB instance
-- (Optional) Kubernetes cluster for deployment
+## 1. What the App Is
+- **Backend:** Spring Boot (Java 17)
+- **Frontend:** React + TypeScript
+- **Default DB:** Embedded H2 (local/dev)
+- **Production DB:** MongoDB (remote, e.g., EC2)
+- **Metrics:** Prometheus endpoint
+- **Deployment:** Docker, Kubernetes, GitHub Actions
 
-## Running with Docker (nginx + Spring Boot)
+---
 
-After building your Docker image, run:
+## 2. How to Build Locally (No Docker)
 
+### Backend (Spring Boot)
 ```sh
-docker run -p 80:80 -p 8080:8080 wiz-khalubernetes:latest
+cd backend
+mvn clean package
+java -jar target/wiz-khalubernetes-backend-0.0.1-SNAPSHOT.jar
 ```
-2. Configure your AWS credentials:
-    - You can set them in `terraform/terraform.tfvars` as `aws_access_key` and `aws_secret_key` (not recommended for production).
-    - Or, set them as environment variables before running Terraform:
-       ```sh
-       export AWS_ACCESS_KEY_ID=your-access-key
-       export AWS_SECRET_ACCESS_KEY=your-secret-key
-       export AWS_DEFAULT_REGION=us-east-1
-       ```
-3. Edit `terraform/main.tf` to set your key name, region, and AMI, or use `terraform.tfvars`.
-4. Initialize and apply Terraform:
-   ```sh
-   cd terraform
-   terraform init
-   terraform apply
-   ```
-5. After provisioning, use the output `ec2_public_ip` to connect your app to MongoDB:
-   ```
-   mongodb://<username>:<password>@<ec2_public_ip>:27017/<database>?authSource=admin
-   ```
+- Default: Uses embedded H2 DB
+- To use MongoDB, set `spring.data.mongodb.uri` in `src/main/resources/application.properties`
 
-## API Endpoints (on EKS)
-
-Assuming your app is exposed at `http://<EXTERNAL-IP>` via the LoadBalancer service:
-
-| Endpoint                      | Method | Description                                 | Example URL                                 |
-|-------------------------------|--------|---------------------------------------------|---------------------------------------------|
-| `/api/quotes`                 | POST   | Submit a new Wiz Khalifa quote              | `http://<EXTERNAL-IP>/api/quotes`           |
-| `/api/quotes/latest`          | GET    | Get the latest quote                        | `http://<EXTERNAL-IP>/api/quotes/latest`    |
-| `/api/nodeinfo`               | GET    | Get node/system/application info            | `http://<EXTERNAL-IP>/api/nodeinfo`         |
-| `/actuator/prometheus`        | GET    | Prometheus metrics endpoint                 | `http://<EXTERNAL-IP>/actuator/prometheus`  |
-
-Replace `<EXTERNAL-IP>` with the public IP from your LoadBalancer service.
-
-docker run -p 80:80 -p 8080:8080 wiz-khalubernetes:latest
-```
-
-- Access the React UI at: [http://localhost/](http://localhost/)
-- Access the backend API at: [http://localhost:8080/](http://localhost:8080/)
-
-- **React UI:** [http://localhost/](http://localhost/)
-
-
-## Local Development & Testing
-
-
-### 1. Build the Docker Image
-
-
-#### For amd64 architecture (recommended for most cloud platforms)
-```
-docker buildx build --platform linux/amd64 -t wiz-khalubernetes .
-```
-
-#### Force Docker Build Without Cache
-To rebuild all layers from scratch and avoid using cached files, use:
-```
-docker buildx build --no-cache --platform linux/amd64 -t wiz-khalubernetes .
-```
-
-#### For your local architecture
-```
-docker build -t wiz-khalubernetes .
-```
-
-### (Optional) Clean Up Docker Images and Build Cache
-After building images, you can free up disk space by removing unused images and build cache:
-```
-docker image prune -f
-docker builder prune -f
-```
-This will remove dangling images and build cache. Use with caution if you have other images you want to keep.
-
-
-### 2. Run the Container
-
-#### With an active MongoDB cluster (EC2 example)
-Replace `<ec2-public-ip>`, `<username>`, `<password>`, and `<database>` with your actual values:
-```
-docker run -p 8080:8080 \
-   -e MONGO_USER="yourMongoUser" \
-   -e MONGO_PASSWORD="yourMongoPassword" \
-   -e MONGODB_URI="mongodb://yourMongoUser:yourMongoPassword@<ec2-public-ip>:27017/<database>?authSource=admin" \
-   wiz-khalubernetes
-```
-
-#### Without a MongoDB cluster (quick test)
-You can run the app without a MongoDB connection. The app will load, but quote submission will show a friendly error message in the UI indicating the database is unavailable.
-```
-docker run -p 8080:8080 wiz-khalubernetes
-```
-
-#### Accessing the App in Your Browser
-After running the container, open your browser and go to:
-
-```
-http://localhost:8080
-```
-You should see the Wiz Khalubernetes app homepage. If MongoDB is not available, quote submission will show a friendly error message.
-
-
-### 2a. Local Frontend (NPM) Testing
-To test the React frontend locally (without Docker):
-1. Make sure your TypeScript version is compatible with react-scripts (TypeScript 4.x recommended).
-2. Run the following commands:
-```
+### Frontend (React)
+```sh
 cd frontend
 npm install
 npm start
 ```
-If you see a TypeScript version error, run:
-```
-npm install typescript@4.9.5
-npm install
-```
-This will start the frontend on [http://localhost:3000](http://localhost:3000). You can develop and test UI changes here before building the Docker image.
+- Runs at [http://localhost:3000](http://localhost:3000)
 
-#### Without a MongoDB cluster (quick test)
-You can run the app without a MongoDB connection. The app will load, but quote submission will show a friendly error message in the UI indicating the database is unavailable.
+---
+
+## 3. How to Build with Docker on a MacBook
+
+### Build Docker Image
+```sh
+docker build -t wiz-khalubernetes .
 ```
+- For amd64: `docker buildx build --platform linux/amd64 -t wiz-khalubernetes .`
+- No cache: `docker buildx build --no-cache --platform linux/amd64 -t wiz-khalubernetes .`
+- Prune images: `docker image prune -f && docker builder prune -f`
+
+### Run Container
+```sh
 docker run -p 8080:8080 wiz-khalubernetes
 ```
+- Access backend: [http://localhost:8080](http://localhost:8080)
+- Access frontend: [http://localhost:3000](http://localhost:3000)
 
-### 3. Access the Application
-- Open your browser at [http://localhost:8080](http://localhost:8080)
-- Submit and view Wiz Khalifa quotes (if MongoDB is available)
-- If MongoDB is not available, you will see a graceful error message when submitting quotes.
+---
 
-### 4. Prometheus Metrics
-- Visit [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus)
+## 4. Changing the Connection String (Local/Remote MongoDB)
 
-## Kubernetes Deployment
+- **Default:** Embedded H2 DB (no config needed)
+- **Remote MongoDB:**
+   - Set in `backend/src/main/resources/application.properties`:
+      ```properties
+      spring.data.mongodb.uri=mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin
+      ```
+   - Or set as environment variable:
+      ```sh
+      export SPRING_DATA_MONGODB_URI="mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin"
+      ```
+   - Example for EC2:
+      ```properties
+      spring.data.mongodb.uri=mongodb://admin:password@ec2-xx-xx-xx-xx.compute.amazonaws.com:27017/wizquotes?authSource=admin
+      ```
 
-1. Edit `deployment.yaml`:
-    - Set the `image` field to your built/pushed Docker image
-    - Set the `MONGODB_URI` environment variable in `deployment.yaml` to your remote MongoDB connection string, including credentials. For example:
-       `mongodb://<username>:<password>@<ec2-public-ip>:27017/<database>?authSource=admin`
-    - The backend reads this value from the environment; do not hardcode credentials in `application.properties`.
-    - (Optional) Use Kubernetes secrets for sensitive values
+---
 
+## 5. GitHub Actions Used to Build and Create the Mongo Instance
 
-2. Apply the deployment:
+- **CI/CD:**
+   - `.github/workflows/docker-image.yml` builds and pushes Docker images to DockerHub on every push to `main`.
+   - Secrets required: `DOCKER_USERNAME`, `DOCKER_PASSWORD`
+- **MongoDB EC2 Provisioning:**
+   - `terraform/` folder contains Terraform scripts to provision an EC2 instance and install MongoDB.
+   - Example usage:
+      ```sh
+      cd terraform
+      terraform init
+      terraform apply
+      ```
+   - Output: EC2 public IP for MongoDB connection
+
+---
+
+## 6. Deploying to Kubernetes (Two Ways)
+
+### Option 1: Local DB (H2)
+- No external DB required
+- Deploy with default config
+- Example:
+   ```sh
+   kubectl apply -f deployment.yaml
+   ```
+
+### Option 2: Remote MongoDB
+- Set `MONGODB_URI` in `deployment.yaml` to your remote MongoDB connection string
+- Example:
+   ```yaml
+   env:
+      - name: SPRING_DATA_MONGODB_URI
+         value: mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin
+   ```
+- Use Kubernetes secrets for sensitive values
+
+---
+
+## 7. How to Access wizexercise.txt Locally in Docker and via Remote Kubernetes
+
+### In Docker Container
+```sh
+docker ps  # Get container ID
+docker exec -it <container_id> sh
+cat wizexercise.txt
 ```
-kubectl apply -f deployment.yaml
+
+### In Kubernetes Pod
+```sh
+kubectl get pods  # Get pod name
+kubectl exec -it <pod_name> -- sh
+cat wizexercise.txt
 ```
 
-## Accessing the App on EKS (AWS Elastic Kubernetes Service)
+---
 
-After deploying, a LoadBalancer service will be created. To get the external URL:
+## 8. API Endpoints
+| Endpoint                      | Method | Description                                 |
+|-------------------------------|--------|---------------------------------------------|
+| `/api/quotes`                 | POST   | Submit a new Wiz Khalifa quote              |
+| `/api/quotes/latest`          | GET    | Get the latest quote                        |
+| `/api/nodeinfo`               | GET    | Get node/system/application info            |
+| `/api/dbstatus`               | GET    | Get current DB connection status/type       |
+| `/actuator/prometheus`        | GET    | Prometheus metrics endpoint                 |
 
-1. Get the service details:
-   ```
-   ```
-   ```
-4. Prometheus metrics are available at:
-   ```
-   http://<EXTERNAL-IP>/actuator/prometheus
-   ```
+---
 
-
-## Accessing wizexercise.txt in a Running Container
-
-### Docker
-To access `wizexercise.txt` inside a running Docker container:
-
-1. List running containers to get the container ID:
-   ```
-   docker ps
-   ```
-2. Exec into the container shell:
-   ```
-   docker exec -it <container_id> sh
-   ```
-3. View the file:
-   ```
-   cat wizexercise.txt
-   ```
-
-### Kubernetes
-To access `wizexercise.txt` in a running Kubernetes pod:
-
-1. List pods to get the pod name:
-   ```
-   kubectl get pods
+Feel free to customize and extend Wiz Khalubernetes!
    ```
 2. Exec into the pod shell:
    ```

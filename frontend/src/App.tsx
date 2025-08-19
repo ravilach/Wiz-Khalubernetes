@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [submittedQuote, setSubmittedQuote] = useState<any>(null);
   const [latestQuote, setLatestQuote] = useState<any>(null);
   const [nodeInfo, setNodeInfo] = useState<any>(null);
+  const [dbStatus, setDbStatus] = useState<{connected: string, type: string, message: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,6 +57,9 @@ const App: React.FC = () => {
         }
       })
       .catch(() => setLatestQuote(null));
+    axios.get('/api/dbstatus')
+      .then((res: { data: any }) => setDbStatus(res.data))
+      .catch(() => setDbStatus(null));
   }, []);
 
   return (
@@ -144,6 +148,13 @@ const App: React.FC = () => {
       )}
       <footer style={{ marginTop: 48, borderTop: '1px solid #fff', paddingTop: 16, opacity: 0.95 }}>
         <h3 style={{ fontWeight: 700, fontSize: 22, marginBottom: 12 }}>Node/Application Info</h3>
+        {dbStatus && (
+          <div style={{ marginBottom: 12, color: dbStatus.connected === 'true' ? '#baffba' : '#ffbaba', fontWeight: 600 }}>
+            <span>DB Status: </span>
+            <span>{dbStatus.connected === 'true' ? 'Connected' : 'Not Connected'} ({dbStatus.type})</span>
+            <span style={{ marginLeft: 8, fontWeight: 400, fontSize: 14, color: '#fff' }}>{dbStatus.message}</span>
+          </div>
+        )}
         {nodeInfo ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
             <div><strong>Hostname:</strong> {nodeInfo.hostname}</div>

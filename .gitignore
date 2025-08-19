@@ -1,3 +1,6 @@
+# Maven Surefire test reports
+backend/target/surefire-reports/
+
 # Ignore macOS system files
 .DS_Store
 
