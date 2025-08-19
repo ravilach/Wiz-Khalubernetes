@@ -64,21 +64,60 @@ A full-stack Spring Boot + React application for sharing your favorite Wiz Khali
 After building your Docker image, run:
 
 ```
+## CI/CD: Build and Push Docker Image with GitHub Actions
+
+This project includes a sample GitHub Actions workflow to build and push the Docker image to DockerHub on every push to `main`.
+
+1. Set up your DockerHub credentials as GitHub repository secrets:
+   - `DOCKER_USERNAME`
+   - `DOCKER_PASSWORD`
+2. On push to `main`, the workflow in `.github/workflows/docker-image.yml` will build and push the image tagged as `wiz-khalubernetes:latest`.
+
+## Infrastructure: Provision MongoDB EC2 Instance with Terraform
+
+Sample Terraform configuration is provided in the `terraform/` folder to create an Amazon EC2 instance and install MongoDB.
+
+1. Install [Terraform](https://www.terraform.io/downloads.html).
+2. Configure your AWS credentials:
+    - You can set them in `terraform/terraform.tfvars` as `aws_access_key` and `aws_secret_key` (not recommended for production).
+    - Or, set them as environment variables before running Terraform:
+       ```sh
+       export AWS_ACCESS_KEY_ID=your-access-key
+       export AWS_SECRET_ACCESS_KEY=your-secret-key
+       export AWS_DEFAULT_REGION=us-east-1
+       ```
+3. Edit `terraform/main.tf` to set your key name, region, and AMI, or use `terraform.tfvars`.
+4. Initialize and apply Terraform:
+   ```sh
+   cd terraform
+   terraform init
+   terraform apply
+   ```
+5. After provisioning, use the output `ec2_public_ip` to connect your app to MongoDB:
+   ```
+   mongodb://<username>:<password>@<ec2_public_ip>:27017/<database>?authSource=admin
+   ```
+
+## API Endpoints (on EKS)
+
+Assuming your app is exposed at `http://<EXTERNAL-IP>` via the LoadBalancer service:
+
+| Endpoint                      | Method | Description                                 | Example URL                                 |
+|-------------------------------|--------|---------------------------------------------|---------------------------------------------|
+| `/api/quotes`                 | POST   | Submit a new Wiz Khalifa quote              | `http://<EXTERNAL-IP>/api/quotes`           |
+| `/api/quotes/latest`          | GET    | Get the latest quote                        | `http://<EXTERNAL-IP>/api/quotes/latest`    |
+| `/api/nodeinfo`               | GET    | Get node/system/application info            | `http://<EXTERNAL-IP>/api/nodeinfo`         |
+| `/actuator/prometheus`        | GET    | Prometheus metrics endpoint                 | `http://<EXTERNAL-IP>/actuator/prometheus`  |
+
+Replace `<EXTERNAL-IP>` with the public IP from your LoadBalancer service.
+
 docker run -p 80:80 -p 8080:8080 wiz-khalubernetes:latest
 ```
 
 - Access the React UI at: [http://localhost/](http://localhost/)
 - Access the backend API at: [http://localhost:8080/](http://localhost:8080/)
 
-
-## Accessing the App in Your Browser
-
-Once your Docker container is running, open your browser and go to:
-
 - **React UI:** [http://localhost/](http://localhost/)
-- **Backend API:** [http://localhost:8080/](http://localhost:8080/)
-
-The React UI is served on port 80 by nginx, and the backend API is available on port 8080.
 
 
 ## Local Development & Testing
@@ -123,7 +162,6 @@ docker run -p 8080:8080 \
    -e MONGODB_URI="mongodb://yourMongoUser:yourMongoPassword@<ec2-public-ip>:27017/<database>?authSource=admin" \
    wiz-khalubernetes
 ```
-
 
 #### Without a MongoDB cluster (quick test)
 You can run the app without a MongoDB connection. The app will load, but quote submission will show a friendly error message in the UI indicating the database is unavailable.
@@ -191,12 +229,7 @@ After deploying, a LoadBalancer service will be created. To get the external URL
 
 1. Get the service details:
    ```
-   kubectl get svc wiz-khalubernetes-lb
    ```
-2. Look for the `EXTERNAL-IP` column. This is the public address of your app.
-3. Access the app in your browser:
-   ```
-   http://<EXTERNAL-IP>
    ```
 4. Prometheus metrics are available at:
    ```

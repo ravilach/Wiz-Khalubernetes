@@ -1,3 +1,5 @@
+// Main Spring Boot application class for Wiz Khalubernetes
+// Includes fallback MongoTemplate bean for resilience
 package com.wizkhalubernetes;
 
 import org.springframework.boot.SpringApplication;

@@ -1,3 +1,4 @@
+// Data model for Wiz Khalifa quotes stored in MongoDB
 package com.wizkhalubernetes.model;
 
 import org.springframework.data.annotation.Id;

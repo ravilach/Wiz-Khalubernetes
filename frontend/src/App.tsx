@@ -1,3 +1,5 @@
+// Main React component for Wiz Khalubernetes UI
+// Handles quote submission, displays latest quote, node info, and error handling
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 

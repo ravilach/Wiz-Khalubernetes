@@ -1,3 +1,4 @@
+// MongoDB configuration with conditional dummy template for resilience
 
 package com.wizkhalubernetes.config;
 

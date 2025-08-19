@@ -1,3 +1,4 @@
+// Global exception handler for friendly error responses
 package com.wizkhalubernetes.controller;
 
 import org.springframework.http.HttpStatus;

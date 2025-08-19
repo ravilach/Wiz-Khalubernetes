@@ -1,3 +1,4 @@
+// MongoDB repository interface for Quote documents
 package com.wizkhalubernetes.repository;
 
 import com.wizkhalubernetes.model.Quote;

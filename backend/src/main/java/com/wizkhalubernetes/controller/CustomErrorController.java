@@ -1,3 +1,4 @@
+// Custom error controller for handling /error endpoint
 package com.wizkhalubernetes.controller;
 
 import org.springframework.boot.web.error.ErrorAttributeOptions;

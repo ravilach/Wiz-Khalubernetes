@@ -1,3 +1,5 @@
+// Prometheus metrics configuration for Spring Boot app
+// Provides beans for PrometheusMeterRegistry and MeterRegistry
 package com.wizkhalubernetes.prometheus;
 
 import io.micrometer.core.instrument.MeterRegistry;
