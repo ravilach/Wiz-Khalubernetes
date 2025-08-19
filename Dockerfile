@@ -28,10 +28,9 @@ WORKDIR /app
 COPY --from=backend-build /app/backend/target/*.jar app.jar
 COPY wizexercise.txt ./wizexercise.txt
 
-FROM nginx:1.25-alpine AS frontend-server
+FROM nginx:1.25 AS frontend-server
 WORKDIR /usr/share/nginx/html
 COPY --from=frontend-build /app/frontend/build .
-RUN rm /etc/nginx/conf.d/default.conf
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app
@@ -39,7 +38,7 @@ COPY --from=base /app/app.jar app.jar
 COPY --from=base /app/wizexercise.txt wizexercise.txt
 RUN apt-get update && apt-get install -y nginx
 COPY --from=frontend-build /app/frontend/build /usr/share/nginx/html
-RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080 80
 ENV SPRING_PROFILES_ACTIVE=prod
 CMD ["sh", "-c", "nginx -g 'daemon off;' & java -jar app.jar"]
