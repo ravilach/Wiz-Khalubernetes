@@ -7,18 +7,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
-@ConditionalOnProperty(name = "spring.data.mongodb.uri")
 @EnableMongoRepositories(basePackages = "com.wizkhalubernetes.repository")
 public class MongoConfig {
+    @Value("${REMOTE_DB:false}")
+    private String remoteDbFlag;
+
     @Bean
+    @ConditionalOnProperty(name = "REMOTE_DB", havingValue = "true")
     public MongoTemplate mongoTemplate(org.springframework.core.env.Environment env) {
         String uri = env.getProperty("spring.data.mongodb.uri");
         if (uri == null || uri.isEmpty()) {
             System.err.println("MongoDB URI not set. Using H2 embedded DB for local startup.");
-            // H2 will be used by default via Spring Boot auto-configuration
-            // Return a dummy MongoTemplate to satisfy bean creation
             return new MongoTemplate(new org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory("mongodb://localhost:27017/dummy"));
         }
         try {

@@ -63,12 +63,19 @@ docker build -t wiz-khalubernetes .
 
 ### Run Container
 ```sh
+# For local H2 (default, fast startup)
 docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
+# or explicitly
+# docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=false wiz-khalubernetes
+
+# For remote MongoDB
+docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=true -e MONGODB_URI="mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin" wiz-khalubernetes
 ```
 - Access frontend: [http://localhost](http://localhost) (served by nginx on port 80)
 - Access backend API: [http://localhost:8080](http://localhost:8080)
 
 > **Note:** If you only map port 8080, the frontend will not be available. Always map port 80 for the UI.
+> **Default behavior:** If REMOTE_DB is not set, the app uses local H2 for fastest startup.
 
 ---
 
@@ -100,21 +107,14 @@ docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
    - `.github/workflows/docker-image.yml` builds and pushes Docker images to DockerHub on every push to `main`.
    - Secrets required: `DOCKER_USERNAME`, `DOCKER_PASSWORD`
 
-### Option 1: Local DB (H2)
-- No external DB required
-- Deploy with default config
-- Example:
+
+### Switching Between Local DB (H2) and Remote MongoDB
+- Use the `REMOTE_DB` environment variable in `deployment.yaml`:
+   - `REMOTE_DB: "false"` (default) uses embedded H2 (no external DB required)
+   - `REMOTE_DB: "true"` uses remote MongoDB (set `MONGODB_URI` accordingly)
+- To switch, edit `deployment.yaml` and redeploy:
    ```sh
    kubectl apply -f deployment.yaml
-   ```
-
-### Option 2: Remote MongoDB
-- Set `MONGODB_URI` in `deployment.yaml` to your remote MongoDB connection string
-- Example:
-   ```yaml
-   env:
-      - name: SPRING_DATA_MONGODB_URI
-         value: mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin
    ```
 - Use Kubernetes secrets for sensitive values
 

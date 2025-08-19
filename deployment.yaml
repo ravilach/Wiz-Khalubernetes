@@ -21,6 +21,8 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: REMOTE_DB
+              value: "false" # Set to "true" for remote MongoDB, "false" for local H2
             - name: MONGODB_URI
               value: "mongodb://<username>:<password>@<ec2-public-ip>:27017/<database>?authSource=admin"
           resources:
