@@ -102,13 +102,17 @@ docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=true -e MONGODB_URI="mongodb://<us
 ## 5. GitHub Actions Used to Build and Create the Mongo Instance
 
 
-
 - **CI/CD:**
    - `.github/workflows/docker-image.yml` builds and pushes Docker images to DockerHub on every push to `main`.
    - Secrets required: `DOCKER_USERNAME`, `DOCKER_PASSWORD`
+- **MongoDB Provisioning:**
+   - `.github/workflows/terraform-apply.yml` applies Terraform in the `terraform/` folder to provision a MongoDB EC2 instance automatically.
+   - Required secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, (optional) `AWS_DEFAULT_REGION`
+   - Output: EC2 public IP for MongoDB connection
 
+---
 
-### Switching Between Local DB (H2) and Remote MongoDB
+## 6 Switching Between Local DB (H2) and Remote MongoDB
 - Use the `REMOTE_DB` environment variable in `deployment.yaml`:
    - `REMOTE_DB: "false"` (default) uses embedded H2 (no external DB required)
    - `REMOTE_DB: "true"` uses remote MongoDB (set `MONGODB_URI` accordingly)
@@ -120,7 +124,38 @@ docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=true -e MONGODB_URI="mongodb://<us
 
 ---
 
-## 7. How to Access wizexercise.txt Locally in Docker and via Remote Kubernetes
+## 7. Deploying to Kubernetes and Accessing the App
+
+### Deploy to Kubernetes
+1. Edit `deployment.yaml`:
+   - Set the `image` field to your built/pushed Docker image.
+   - Set `REMOTE_DB` and `MONGODB_URI` environment variables as needed (see section 6).
+2. Apply the deployment:
+   ```sh
+   kubectl apply -f deployment.yaml
+   ```
+3. Check pod and service status:
+   ```sh
+   kubectl get pods
+   kubectl get svc
+   ```
+
+### Access the App
+- After deployment, a LoadBalancer service will expose the app.
+- Get the external IP:
+   ```sh
+   kubectl get svc wiz-khalubernetes-lb
+   ```
+- Access the frontend at:
+   `http://<EXTERNAL-IP>`
+- Access the backend API at:
+   `http://<EXTERNAL-IP>:8080`
+- Prometheus metrics:
+   `http://<EXTERNAL-IP>:8080/actuator/prometheus`
+
+---
+
+## 8. How to Access wizexercise.txt Locally in Docker and via Remote Kubernetes
 
 ### In Docker Container
 ```sh
