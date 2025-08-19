@@ -102,12 +102,20 @@ You can run the app without a MongoDB connection. The app will load, but quote s
 docker run -p 8080:8080 wiz-khalubernetes
 ```
 
+
 ### 2a. Local Frontend (NPM) Testing
 To test the React frontend locally (without Docker):
+1. Make sure your TypeScript version is compatible with react-scripts (TypeScript 4.x recommended).
+2. Run the following commands:
 ```
 cd frontend
 npm install
 npm start
+```
+If you see a TypeScript version error, run:
+```
+npm install typescript@4.9.5
+npm install
 ```
 This will start the frontend on [http://localhost:3000](http://localhost:3000). You can develop and test UI changes here before building the Docker image.
 
