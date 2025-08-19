@@ -16,6 +16,7 @@ spec:
         - name: wiz-khalubernetes
           image: <your-docker-image>
           ports:
+            - containerPort: 80
             - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -46,4 +47,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 80

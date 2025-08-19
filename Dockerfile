@@ -32,13 +32,14 @@ FROM nginx:1.25-alpine AS frontend-server
 WORKDIR /usr/share/nginx/html
 COPY --from=frontend-build /app/frontend/build .
 RUN rm /etc/nginx/conf.d/default.conf
-COPY --from=base /app/wizexercise.txt /usr/share/nginx/html/wizexercise.txt
 
-FROM base AS final
+FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=frontend-server /usr/share/nginx/html /app/frontend/build
+COPY --from=base /app/app.jar app.jar
+COPY --from=base /app/wizexercise.txt wizexercise.txt
 RUN apt-get update && apt-get install -y nginx
-COPY --from=frontend-server /etc/nginx /etc/nginx
+COPY --from=frontend-build /app/frontend/build /usr/share/nginx/html
+RUN rm /etc/nginx/conf.d/default.conf
 EXPOSE 8080 80
 ENV SPRING_PROFILES_ACTIVE=prod
 CMD ["sh", "-c", "nginx -g 'daemon off;' & java -jar app.jar"]
