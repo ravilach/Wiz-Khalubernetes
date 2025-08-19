@@ -1,18 +1,13 @@
-// MongoDB configuration with conditional dummy template for resilience
-
-package com.wizkhalubernetes.config;
+package com.wizkhalubernetes.config.mongo;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.beans.factory.annotation.Value;
-import jakarta.annotation.PostConstruct;
 
 @Configuration
-@Profile("mongo")
 @ConditionalOnProperty(name = "REMOTE_DB", havingValue = "true")
 @EnableMongoRepositories(basePackages = "com.wizkhalubernetes.repository.mongo")
 public class MongoConfig {
@@ -33,12 +28,5 @@ public class MongoConfig {
             System.err.println("MongoDB connection failed: " + e.getMessage());
             return new MongoTemplate(new org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory("mongodb://localhost:27017/dummy"));
         }
-    }
-
-    @PostConstruct
-    public void logRemoteDbFlag() {
-        System.out.println("[DEBUG] REMOTE_DB value at startup (MongoConfig): " + remoteDbFlag);
-        String envValue = System.getenv("REMOTE_DB");
-        System.out.println("[DEBUG] REMOTE_DB from System.getenv: " + envValue);
     }
 }

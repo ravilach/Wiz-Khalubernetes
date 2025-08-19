@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-import com.wizkhalubernetes.model.Quote;
+import com.wizkhalubernetes.model.mongo.QuoteMongo;
+import com.wizkhalubernetes.model.h2.QuoteH2;
 import com.wizkhalubernetes.repository.mongo.QuoteMongoRepository;
-import com.wizkhalubernetes.repository.jpa.QuoteJpaRepository;
+import com.wizkhalubernetes.repository.h2.QuoteH2Repository;
 import org.springframework.dao.DataAccessResourceFailureException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
@@ -19,9 +20,11 @@ import java.util.Map;
 @RequestMapping("/api")
 public class QuoteController {
     @Autowired(required = false)
+    @org.springframework.beans.factory.annotation.Qualifier("mongoQuoteRepository")
     private QuoteMongoRepository quoteMongoRepository;
     @Autowired(required = false)
-    private QuoteJpaRepository quoteJpaRepository;
+    @org.springframework.beans.factory.annotation.Qualifier("h2QuoteRepository")
+    private QuoteH2Repository quoteJpaRepository;
     @Autowired
     private org.springframework.core.env.Environment env;
 
@@ -38,7 +41,7 @@ public class QuoteController {
             }
             try {
                 String quoteText = payload.get("quote");
-                Quote quote = new Quote();
+                QuoteMongo quote = new QuoteMongo();
                 quote.setQuote(quoteText);
                 quote.setTimestamp(Instant.now().toString());
                 String ip = request.getHeader("X-Forwarded-For");
@@ -47,7 +50,7 @@ public class QuoteController {
                 }
                 quote.setIp(ip);
                 quote.setQuoteNumber(getNextQuoteNumber());
-                Quote saved = quoteMongoRepository.save(quote);
+                QuoteMongo saved = quoteMongoRepository.save(quote);
                 return ResponseEntity.ok(saved);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -60,7 +63,7 @@ public class QuoteController {
             }
             try {
                 String quoteText = payload.get("quote");
-                Quote quote = new Quote();
+                QuoteH2 quote = new QuoteH2();
                 quote.setQuote(quoteText);
                 quote.setTimestamp(Instant.now().toString());
                 String ip = request.getHeader("X-Forwarded-For");
@@ -69,7 +72,7 @@ public class QuoteController {
                 }
                 quote.setIp(ip);
                 quote.setQuoteNumber(getNextQuoteNumber());
-                Quote saved = quoteJpaRepository.save(quote);
+                QuoteH2 saved = quoteJpaRepository.save(quote);
                 return ResponseEntity.ok(saved);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -90,7 +93,7 @@ public class QuoteController {
             if (count == 0) {
                 return ResponseEntity.ok().body(null);
             }
-            Quote latest = quoteMongoRepository.findAll()
+            QuoteMongo latest = quoteMongoRepository.findAll()
                 .stream()
                 .max((a, b) -> Integer.compare(a.getQuoteNumber(), b.getQuoteNumber()))
                 .orElse(null);
@@ -142,7 +145,7 @@ public class QuoteController {
         boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
         if (useMongo && quoteMongoRepository != null) {
             return (int) (quoteMongoRepository.count() + 1);
-        } else if (quoteJpaRepository != null) {
+    } else if (quoteJpaRepository != null) {
             return (int) (quoteJpaRepository.count() + 1);
         } else {
             return 1;

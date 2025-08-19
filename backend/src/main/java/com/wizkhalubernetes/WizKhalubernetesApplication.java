@@ -5,33 +5,33 @@ package com.wizkhalubernetes;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
-import org.springframework.beans.factory.annotation.Value;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClients;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.ImportSelector;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
 
+class WizKhalubernetesConfigSelector implements ImportSelector, EnvironmentAware {
+    private Environment environment;
+    @Override
+    public void setEnvironment(@NonNull Environment environment) {
+        this.environment = environment;
+    }
+    public @NonNull String[] selectImports(@NonNull AnnotationMetadata importingClassMetadata) {
+        String remoteDb = environment != null ? environment.getProperty("REMOTE_DB", "false") : "false";
+        if ("true".equalsIgnoreCase(remoteDb)) {
+            return new String[]{"com.wizkhalubernetes.config.mongo.MongoConfig"};
+        } else {
+            return new String[]{"com.wizkhalubernetes.config.h2.H2Config"};
+        }
+    }
+}
 @SpringBootApplication
+@Import(WizKhalubernetesConfigSelector.class)
 public class WizKhalubernetesApplication {
     public static void main(String[] args) {
         SpringApplication.run(WizKhalubernetesApplication.class, args);
     }
 
-    // Fallback dummy MongoTemplate bean to prevent app exit if MongoDB is unavailable
-    @Bean
-    @ConditionalOnMissingBean(MongoTemplate.class)
-    public MongoTemplate dummyMongoTemplate() {
-        // Return a MongoTemplate that points to a non-existent DB, but doesn't throw on creation
-        try {
-            return new MongoTemplate(new SimpleMongoClientDatabaseFactory("mongodb://localhost:27017/dummy"));
-        } catch (Exception e) {
-            // Return a no-op MongoTemplate (will throw on actual DB operations, but allows app to start)
-            return null;
-        }
-    }
 }
