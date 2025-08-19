@@ -63,21 +63,9 @@ A full-stack Spring Boot + React application for sharing your favorite Wiz Khali
 
 After building your Docker image, run:
 
+```sh
+docker run -p 80:80 -p 8080:8080 wiz-khalubernetes:latest
 ```
-## CI/CD: Build and Push Docker Image with GitHub Actions
-
-This project includes a sample GitHub Actions workflow to build and push the Docker image to DockerHub on every push to `main`.
-
-1. Set up your DockerHub credentials as GitHub repository secrets:
-   - `DOCKER_USERNAME`
-   - `DOCKER_PASSWORD`
-2. On push to `main`, the workflow in `.github/workflows/docker-image.yml` will build and push the image tagged as `wiz-khalubernetes:latest`.
-
-## Infrastructure: Provision MongoDB EC2 Instance with Terraform
-
-Sample Terraform configuration is provided in the `terraform/` folder to create an Amazon EC2 instance and install MongoDB.
-
-1. Install [Terraform](https://www.terraform.io/downloads.html).
 2. Configure your AWS credentials:
     - You can set them in `terraform/terraform.tfvars` as `aws_access_key` and `aws_secret_key` (not recommended for production).
     - Or, set them as environment variables before running Terraform:
