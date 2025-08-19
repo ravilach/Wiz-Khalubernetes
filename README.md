@@ -65,9 +65,16 @@ A full-stack Spring Boot + React application for sharing your favorite Wiz Khali
 
 ### 1. Build the Docker Image
 
+
 #### For amd64 architecture (recommended for most cloud platforms)
 ```
 docker buildx build --platform linux/amd64 -t wiz-khalubernetes .
+```
+
+#### Force Docker Build Without Cache
+To rebuild all layers from scratch and avoid using cached files, use:
+```
+docker buildx build --no-cache --platform linux/amd64 -t wiz-khalubernetes .
 ```
 
 #### For your local architecture
