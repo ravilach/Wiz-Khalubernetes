@@ -69,7 +69,8 @@ docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
 # docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=false wiz-khalubernetes
 
 # For remote MongoDB
-docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=true -e MONGODB_URI="mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin" wiz-khalubernetes
+# Example: no auth, using IP address
+# docker run -p 80:80 -p 8080:8080 -e REMOTE_DB=true -e MONGODB_URI="mongodb://192.168.1.100:27017/wizquotes" wiz-khalubernetes
 ```
 - Access frontend: [http://localhost](http://localhost) (served by nginx on port 80)
 - Access backend API: [http://localhost:8080](http://localhost:8080)
