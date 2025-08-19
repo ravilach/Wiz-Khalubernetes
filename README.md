@@ -60,12 +60,15 @@ docker build -t wiz-khalubernetes .
 - No cache: `docker buildx build --no-cache --platform linux/amd64 -t wiz-khalubernetes .`
 - Prune images: `docker image prune -f && docker builder prune -f`
 
+
 ### Run Container
 ```sh
-docker run -p 8080:8080 wiz-khalubernetes
+docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
 ```
-- Access backend: [http://localhost:8080](http://localhost:8080)
-- Access frontend: [http://localhost:3000](http://localhost:3000)
+- Access frontend: [http://localhost](http://localhost) (served by nginx on port 80)
+- Access backend API: [http://localhost:8080](http://localhost:8080)
+
+> **Note:** If you only map port 8080, the frontend will not be available. Always map port 80 for the UI.
 
 ---
 
@@ -90,22 +93,11 @@ docker run -p 8080:8080 wiz-khalubernetes
 
 ## 5. GitHub Actions Used to Build and Create the Mongo Instance
 
+
+
 - **CI/CD:**
    - `.github/workflows/docker-image.yml` builds and pushes Docker images to DockerHub on every push to `main`.
    - Secrets required: `DOCKER_USERNAME`, `DOCKER_PASSWORD`
-- **MongoDB EC2 Provisioning:**
-   - `terraform/` folder contains Terraform scripts to provision an EC2 instance and install MongoDB.
-   - Example usage:
-      ```sh
-      cd terraform
-      terraform init
-      terraform apply
-      ```
-   - Output: EC2 public IP for MongoDB connection
-
----
-
-## 6. Deploying to Kubernetes (Two Ways)
 
 ### Option 1: Local DB (H2)
 - No external DB required
