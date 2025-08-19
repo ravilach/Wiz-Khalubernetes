@@ -83,17 +83,33 @@ docker builder prune -f
 ```
 This will remove dangling images and build cache. Use with caution if you have other images you want to keep.
 
+
 ### 2. Run the Container
 
-#### With an active MongoDB cluster
-Replace `<your-mongodb-uri>` with your actual MongoDB connection string, or use environment variables for username and password:
+#### With an active MongoDB cluster (EC2 example)
+Replace `<ec2-public-ip>`, `<username>`, `<password>`, and `<database>` with your actual values:
 ```
 docker run -p 8080:8080 \
    -e MONGO_USER="yourMongoUser" \
    -e MONGO_PASSWORD="yourMongoPassword" \
-   -e MONGODB_URI="mongodb+srv://yourMongoUser:yourMongoPassword@cluster0.mongodb.net/mydatabase?retryWrites=true&w=majority" \
+   -e MONGODB_URI="mongodb://yourMongoUser:yourMongoPassword@<ec2-public-ip>:27017/<database>?authSource=admin" \
    wiz-khalubernetes
 ```
+
+#### Without a MongoDB cluster (quick test)
+You can run the app without a MongoDB connection. The app will load, but quote submission will show a friendly error message in the UI indicating the database is unavailable.
+```
+docker run -p 8080:8080 wiz-khalubernetes
+```
+
+### 2a. Local Frontend (NPM) Testing
+To test the React frontend locally (without Docker):
+```
+cd frontend
+npm install
+npm start
+```
+This will start the frontend on [http://localhost:3000](http://localhost:3000). You can develop and test UI changes here before building the Docker image.
 
 #### Without a MongoDB cluster (quick test)
 You can run the app without a MongoDB connection. The app will load, but quote submission will show a friendly error message in the UI indicating the database is unavailable.

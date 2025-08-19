@@ -2,9 +2,15 @@
 # Build frontend
 FROM node:20 AS frontend-build
 WORKDIR /app/frontend
-COPY frontend/package.json frontend/yarn.lock* frontend/ .
+# Copy only package.json and yarn.lock (if exists)
+COPY frontend/package.json frontend/yarn.lock* ./
+# Install dependencies
 RUN npm install --legacy-peer-deps
-COPY frontend/ .
+# Copy only src and public folders, plus any config files needed for build
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/tsconfig.json ./tsconfig.json
+# Build the frontend
 RUN npm run build
 
 # Build backend
