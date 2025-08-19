@@ -9,6 +9,5 @@ com/wizkhalubernetes/prometheus/MetricsConfig.class
 com/wizkhalubernetes/WizKhalubernetesApplication.class
 com/wizkhalubernetes/WizKhalubernetesConfigSelector.class
 com/wizkhalubernetes/model/h2/QuoteH2.class
-com/wizkhalubernetes/config/MongoConfig.class
 com/wizkhalubernetes/config/h2/H2Config.class
 com/wizkhalubernetes/config/mongo/MongoConfig.class
