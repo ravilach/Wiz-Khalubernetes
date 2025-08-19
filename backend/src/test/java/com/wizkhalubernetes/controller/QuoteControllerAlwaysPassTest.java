@@ -2,10 +2,10 @@ package com.wizkhalubernetes.controller;
 
 import org.junit.jupiter.api.Test;
 
-public class QuoteControllerTest {
+public class QuoteControllerAlwaysPassTest {
     @Test
     public void alwaysPasses() {
-        // Dummy test that always passes
+        // This test always passes
         assert(true);
     }
 }

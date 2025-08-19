@@ -1,5 +1,5 @@
+/Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/repository/QuoteMongoRepository.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/repository/QuoteJpaRepository.java
-/Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/repository/QuoteRepository.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/controller/QuoteController.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/model/Quote.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/controller/CustomErrorController.java

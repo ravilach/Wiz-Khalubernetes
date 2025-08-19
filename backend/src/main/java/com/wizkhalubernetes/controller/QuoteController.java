@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import com.wizkhalubernetes.model.Quote;
-import com.wizkhalubernetes.repository.QuoteRepository;
+import com.wizkhalubernetes.repository.QuoteMongoRepository;
 import com.wizkhalubernetes.repository.QuoteJpaRepository;
 import org.springframework.dao.DataAccessResourceFailureException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +19,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class QuoteController {
     @Autowired(required = false)
-    private QuoteRepository quoteRepository;
+    private QuoteMongoRepository quoteMongoRepository;
     @Autowired(required = false)
     private QuoteJpaRepository quoteJpaRepository;
     @Autowired
@@ -32,7 +32,7 @@ public class QuoteController {
     public ResponseEntity<?> addQuote(@RequestBody Map<String, String> payload, HttpServletRequest request) {
         boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
         if (useMongo) {
-            if (quoteRepository == null) {
+            if (quoteMongoRepository == null) {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(errorResponse("MongoDB connection unavailable at configured URL."));
             }
@@ -47,7 +47,7 @@ public class QuoteController {
                 }
                 quote.setIp(ip);
                 quote.setQuoteNumber(getNextQuoteNumber());
-                Quote saved = quoteRepository.save(quote);
+                Quote saved = quoteMongoRepository.save(quote);
                 return ResponseEntity.ok(saved);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -81,16 +81,16 @@ public class QuoteController {
 
     @GetMapping("/quotes/latest")
     public ResponseEntity<?> getLatestQuote() {
-        if (quoteRepository == null) {
+    if (quoteMongoRepository == null) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(errorResponse("MongoDB connection unavailable at configured URL."));
         }
         try {
-            long count = quoteRepository.count();
+            long count = quoteMongoRepository.count();
             if (count == 0) {
                 return ResponseEntity.ok().body(null);
             }
-            Quote latest = quoteRepository.findAll()
+            Quote latest = quoteMongoRepository.findAll()
                 .stream()
                 .max((a, b) -> Integer.compare(a.getQuoteNumber(), b.getQuoteNumber()))
                 .orElse(null);
@@ -140,8 +140,8 @@ public class QuoteController {
      */
     private int getNextQuoteNumber() {
         boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
-        if (useMongo && quoteRepository != null) {
-            return (int) (quoteRepository.count() + 1);
+        if (useMongo && quoteMongoRepository != null) {
+            return (int) (quoteMongoRepository.count() + 1);
         } else if (quoteJpaRepository != null) {
             return (int) (quoteJpaRepository.count() + 1);
         } else {
