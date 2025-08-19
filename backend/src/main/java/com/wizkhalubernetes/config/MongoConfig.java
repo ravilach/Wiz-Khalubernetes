@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.beans.factory.annotation.Value;
-import com.wizkhalubernetes.repository.QuoteMongoRepository;
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 @ConditionalOnProperty(name = "REMOTE_DB", havingValue = "true")
-@EnableMongoRepositories(basePackageClasses = QuoteMongoRepository.class)
+@EnableMongoRepositories(basePackages = "com.wizkhalubernetes.repository.mongo")
 public class MongoConfig {
     @Value("${REMOTE_DB:false}")
     private String remoteDbFlag;
@@ -31,5 +31,12 @@ public class MongoConfig {
             System.err.println("MongoDB connection failed: " + e.getMessage());
             return new MongoTemplate(new org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory("mongodb://localhost:27017/dummy"));
         }
+    }
+
+    @PostConstruct
+    public void logRemoteDbFlag() {
+        System.out.println("[DEBUG] REMOTE_DB value at startup (MongoConfig): " + remoteDbFlag);
+        String envValue = System.getenv("REMOTE_DB");
+        System.out.println("[DEBUG] REMOTE_DB from System.getenv: " + envValue);
     }
 }
