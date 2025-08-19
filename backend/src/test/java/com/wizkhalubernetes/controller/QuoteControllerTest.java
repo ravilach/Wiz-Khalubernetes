@@ -30,9 +30,12 @@ class QuoteControllerTest {
 
         Map<String, String> payload = new HashMap<>();
         payload.put("quote", "Test quote");
-        ResponseEntity<?> response = controller.addQuote(payload);
-        assertEquals(200, response.getStatusCodeValue());
-        assertTrue(response.getBody() instanceof Quote);
-        assertEquals("Test quote", ((Quote) response.getBody()).getQuote());
+    jakarta.servlet.http.HttpServletRequest mockRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
+    ResponseEntity<?> response = controller.addQuote(payload, mockRequest);
+    assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode());
+    Object body = response.getBody();
+    assertNotNull(body);
+    assertTrue(body instanceof Quote);
+    assertEquals("Test quote", ((Quote) body).getQuote());
     }
 }

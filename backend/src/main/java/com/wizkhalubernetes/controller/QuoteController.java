@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import com.wizkhalubernetes.model.Quote;
 import com.wizkhalubernetes.repository.QuoteRepository;
 import org.springframework.dao.DataAccessResourceFailureException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.HashMap;
@@ -18,8 +19,11 @@ public class QuoteController {
     @Autowired(required = false)
     private QuoteRepository quoteRepository;
 
+    /**
+     * Adds a new quote and captures the user's IP address from the HTTP request.
+     */
     @PostMapping("/quotes")
-    public ResponseEntity<?> addQuote(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> addQuote(@RequestBody Map<String, String> payload, HttpServletRequest request) {
         if (quoteRepository == null) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(errorResponse("MongoDB connection unavailable at configured URL."));
@@ -29,7 +33,12 @@ public class QuoteController {
             Quote quote = new Quote();
             quote.setQuote(quoteText);
             quote.setTimestamp(Instant.now().toString());
-            quote.setIp(InetAddress.getLocalHost().getHostAddress());
+            // Get user's real IP address from headers or remote address
+            String ip = request.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isEmpty()) {
+                ip = request.getRemoteAddr();
+            }
+            quote.setIp(ip);
             quote.setQuoteNumber((int) (quoteRepository.count() + 1));
             quoteRepository.save(quote);
             return ResponseEntity.ok(quote);
