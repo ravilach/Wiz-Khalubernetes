@@ -41,4 +41,5 @@ COPY --from=frontend-build /app/frontend/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080 80
 ENV SPRING_PROFILES_ACTIVE=prod
+ENV REMOTE_DB=false
 CMD ["sh", "-c", "nginx -g 'daemon off;' & java -jar app.jar"]
