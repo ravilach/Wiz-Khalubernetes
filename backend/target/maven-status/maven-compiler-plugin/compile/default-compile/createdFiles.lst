@@ -1,12 +1,10 @@
 com/wizkhalubernetes/controller/QuoteController.class
-com/wizkhalubernetes/repository/QuoteMongoRepository.class
+com/wizkhalubernetes/prometheus/MetricsConfig.class
+com/wizkhalubernetes/WizKhalubernetesApplication.class
+com/wizkhalubernetes/config/MongoConfig.class
 com/wizkhalubernetes/repository/mongo/QuoteMongoRepository.class
 com/wizkhalubernetes/config/JpaConfig.class
 com/wizkhalubernetes/model/Quote.class
+com/wizkhalubernetes/repository/jpa/QuoteJpaRepository.class
 com/wizkhalubernetes/controller/CustomErrorController.class
 com/wizkhalubernetes/controller/GlobalExceptionHandler.class
-com/wizkhalubernetes/prometheus/MetricsConfig.class
-com/wizkhalubernetes/repository/QuoteJpaRepository.class
-com/wizkhalubernetes/WizKhalubernetesApplication.class
-com/wizkhalubernetes/config/MongoConfig.class
-com/wizkhalubernetes/repository/jpa/QuoteJpaRepository.class
