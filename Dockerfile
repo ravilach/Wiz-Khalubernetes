@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Wiz Khalubernetes
 # Build frontend
-FROM node:20 AS frontend-build
+FROM node:22 AS frontend-build
 WORKDIR /app/frontend
 # Copy only package.json and yarn.lock (if exists)
 COPY frontend/package.json frontend/yarn.lock* ./
