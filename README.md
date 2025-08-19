@@ -60,6 +60,14 @@ docker build -t wiz-khalubernetes .
 - No cache: `docker buildx build --no-cache --platform linux/amd64 -t wiz-khalubernetes .`
 - Prune images: `docker image prune -f && docker builder prune -f`
 
+### Push Docker Image to DockerHub
+```sh
+docker tag wiz-khalubernetes <your-dockerhub-username>/wiz-khalubernetes:latest
+docker push <your-dockerhub-username>/wiz-khalubernetes:latest
+```
+- Make sure you are logged in: `docker login`
+- Replace `<your-dockerhub-username>` with your DockerHub username
+
 
 ### Run Container
 ```sh

@@ -50,8 +50,16 @@ public class QuoteController {
                 }
                 quote.setIp(ip);
                 quote.setQuoteNumber(getNextQuoteNumber());
-                QuoteMongo saved = quoteMongoRepository.save(quote);
-                return ResponseEntity.ok(saved);
+                try {
+                    QuoteMongo saved = quoteMongoRepository.save(quote);
+                    System.out.println("[INFO] Successfully saved quote to MongoDB: " + saved);
+                    return ResponseEntity.ok(saved);
+                } catch (Exception e) {
+                    System.err.println("[ERROR] Failed to save quote to MongoDB: " + e.getMessage());
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(errorResponse("Failed to save quote: " + e.getMessage()));
+                }
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(errorResponse("Failed to save quote: " + e.getMessage()));
@@ -90,18 +98,32 @@ public class QuoteController {
         }
         try {
             long count = quoteMongoRepository.count();
+            System.out.println("[INFO] MongoDB quote count: " + count);
             if (count == 0) {
                 return ResponseEntity.ok().body(null);
             }
-            QuoteMongo latest = quoteMongoRepository.findAll()
-                .stream()
-                .max((a, b) -> Integer.compare(a.getQuoteNumber(), b.getQuoteNumber()))
-                .orElse(null);
+            QuoteMongo latest = null;
+            try {
+                latest = quoteMongoRepository.findAll()
+                    .stream()
+                    .max((a, b) -> Integer.compare(a.getQuoteNumber(), b.getQuoteNumber()))
+                    .orElse(null);
+                System.out.println("[INFO] Fetched latest quote from MongoDB: " + latest);
+            } catch (Exception e) {
+                System.err.println("[ERROR] Failed to fetch latest quote from MongoDB: " + e.getMessage());
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse("Failed to fetch latest quote: " + e.getMessage()));
+            }
             return ResponseEntity.ok(latest);
         } catch (DataAccessResourceFailureException ex) {
+            System.err.println("[ERROR] MongoDB connection unavailable: " + ex.getMessage());
+            ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(errorResponse("MongoDB connection unavailable at configured URL."));
         } catch (Exception ex) {
+            System.err.println("[ERROR] Unexpected error during MongoDB read: " + ex.getMessage());
+            ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(errorResponse("Unexpected error: " + ex.getMessage()));
         }

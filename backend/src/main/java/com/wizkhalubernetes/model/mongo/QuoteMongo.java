@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "quotes")
 public class QuoteMongo {
     @Id
-    private Long id;
+    private String id;
 
     private String quote;
     private String timestamp;
@@ -14,8 +14,8 @@ public class QuoteMongo {
     private int quoteNumber;
 
     // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getQuote() { return quote; }
     public void setQuote(String quote) { this.quote = quote; }
     public String getTimestamp() { return timestamp; }
