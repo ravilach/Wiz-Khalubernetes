@@ -181,11 +181,10 @@ This file is included in the container for exercise/demo purposes.
 | `/api/quotes`                 | POST   | Submit a new Wiz Khalifa quote              |
 | `/api/quotes/latest`          | GET    | Get the latest quote                        |
 | `/api/nodeinfo`               | GET    | Get node/system/application info            |
-| `/api/dbstatus`               | GET    | Get current DB connection status/type       |
+| `/api/dbstatus`               | GET    | Get current DB connection status/type.      |
 | `/actuator/prometheus`        | GET    | Prometheus metrics endpoint                 |
 
 ---
-
 
 
 ## Development Notes

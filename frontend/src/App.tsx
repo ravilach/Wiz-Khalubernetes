@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [dbStatus, setDbStatus] = useState<{connected: string, type: string, message: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [allQuotes, setAllQuotes] = useState<any[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,7 +64,19 @@ const App: React.FC = () => {
     axios.get('/api/dbstatus')
       .then((res: { data: any }) => setDbStatus(res.data))
       .catch(() => setDbStatus(null));
+    axios.get('/api/quotes')
+      .then((res: { data: any[] }) => setAllQuotes(res.data))
+      .catch(() => setAllQuotes([]));
   }, []);
+
+  const handleDeleteQuote = async (id: number) => {
+    try {
+      await axios.delete(`/api/quotes/${id}`);
+      setAllQuotes(quotes => quotes.filter(q => q.id !== id));
+    } catch (err) {
+      setError('Failed to delete quote.');
+    }
+  };
 
   return (
     <div
@@ -125,7 +138,7 @@ const App: React.FC = () => {
       {error && (
         <div style={{ color: '#ffbaba', background: '#d8000c', padding: 12, borderRadius: 8, marginTop: 8, fontWeight: 500 }}>
           {error === 'Could not connect to backend or MongoDB.'
-            ? 'Database connection unavailable. Please check your MongoDB settings.'
+            ? 'Database connection unavailable. Please check your DB settings.'
             : error}
         </div>
       )}
@@ -159,11 +172,26 @@ const App: React.FC = () => {
             <span>DB Status: </span>
             <span>{dbStatus.connected === 'true' ? 'Connected' : 'Not Connected'} ({dbStatus.type})</span>
             <span style={{ marginLeft: 8, fontWeight: 400, fontSize: 14, color: '#fff' }}>{dbStatus.message}</span>
-            <div style={{ marginTop: 8, color: '#fff', fontWeight: 500 }}>
-              <strong>Connected DB:</strong> {dbStatus.type}
-            </div>
+            <div style={{ marginTop: 8 }}><strong>Connected DB:</strong> {dbStatus.type}</div>
           </div>
         )}
+        <div style={{ margin: '32px 0 16px 0' }}>
+          <h4 style={{ fontWeight: 700, fontSize: 20, marginBottom: 10 }}>All Quotes</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            {allQuotes.length === 0 ? (
+              <span style={{ color: '#fff', opacity: 0.7 }}>No quotes found.</span>
+            ) : (
+              allQuotes.map(q => (
+                <div key={q.id} style={{ background: 'rgba(255,255,255,0.08)', padding: 16, borderRadius: 10, minWidth: 220, position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: 8, right: 12, cursor: 'pointer', color: '#ffbaba', fontWeight: 700, fontSize: 18 }} onClick={() => handleDeleteQuote(q.id)}>&times;</span>
+                  <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 6 }}>{q.quote}</div>
+                  <div style={{ fontSize: 13, opacity: 0.8 }}>#{q.quoteNumber} | {q.timestamp}</div>
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>IP: {q.ip}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
         {nodeInfo ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
             <div><strong>Hostname:</strong> {nodeInfo.hostname}</div>

@@ -107,6 +107,65 @@ public class QuoteController {
         }
     }
 
+    /**
+     * Returns all quotes from the active DB (H2 or Mongo).
+     */
+    @GetMapping("/quotes")
+    public ResponseEntity<?> getAllQuotes() {
+        boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
+        if (useMongo) {
+            if (quoteMongoRepository == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("MongoDB connection unavailable at configured URL."));
+            }
+            try {
+                return ResponseEntity.ok(quoteMongoRepository.findAll());
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse("Failed to fetch quotes: " + e.getMessage()));
+            }
+        } else {
+            if (quoteJpaRepository == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("H2/JPA repository unavailable."));
+            }
+            try {
+                return ResponseEntity.ok(quoteJpaRepository.findAll());
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse("Failed to fetch quotes: " + e.getMessage()));
+            }
+        }
+    }
+
+    /**
+     * Deletes a quote by ID from the active DB (H2 or Mongo).
+     */
+    @DeleteMapping("/quotes/{id}")
+    public ResponseEntity<?> deleteQuote(@PathVariable("id") String id) {
+        boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
+        try {
+            if (useMongo) {
+                if (quoteMongoRepository == null) {
+                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(errorResponse("MongoDB connection unavailable at configured URL."));
+                }
+                quoteMongoRepository.deleteById(Long.parseLong(id));
+                return ResponseEntity.ok().body("Deleted");
+            } else {
+                if (quoteJpaRepository == null) {
+                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(errorResponse("H2/JPA repository unavailable."));
+                }
+                quoteJpaRepository.deleteById(Long.parseLong(id));
+                return ResponseEntity.ok().body("Deleted");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorResponse("Failed to delete quote: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/nodeinfo")
     public Map<String, Object> getNodeInfo() {
         Map<String, Object> info = new HashMap<>();
@@ -122,6 +181,25 @@ public class QuoteController {
         info.put("timestamp", Instant.now().toString());
         // Add more Docker/container-specific info if needed
         return info;
+    }
+
+    /**
+     * Returns the current DB status (H2 or Mongo) for frontend UX.
+     */
+    @GetMapping("/dbstatus")
+    public Map<String, String> getDbStatus() {
+        boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
+        Map<String, String> status = new HashMap<>();
+        if (useMongo) {
+            status.put("type", "MongoDB");
+            status.put("connected", quoteMongoRepository != null ? "true" : "false");
+            status.put("message", quoteMongoRepository != null ? "Connected to MongoDB" : "MongoDB repository unavailable");
+        } else {
+            status.put("type", "H2");
+            status.put("connected", quoteJpaRepository != null ? "true" : "false");
+            status.put("message", quoteJpaRepository != null ? "Connected to H2" : "H2 repository unavailable");
+        }
+        return status;
     }
 
     private Map<String, String> errorResponse(String msg) {
