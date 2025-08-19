@@ -62,6 +62,7 @@ A full-stack Spring Boot + React application for sharing your favorite Wiz Khali
 
 ## Local Development & Testing
 
+
 ### 1. Build the Docker Image
 
 #### For amd64 architecture (recommended for most cloud platforms)
@@ -73,6 +74,14 @@ docker buildx build --platform linux/amd64 -t wiz-khalubernetes .
 ```
 docker build -t wiz-khalubernetes .
 ```
+
+### (Optional) Clean Up Docker Images and Build Cache
+After building images, you can free up disk space by removing unused images and build cache:
+```
+docker image prune -f
+docker builder prune -f
+```
+This will remove dangling images and build cache. Use with caution if you have other images you want to keep.
 
 ### 2. Run the Container
 
