@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
+@ConditionalOnProperty(name = "REMOTE_DB", havingValue = "true")
 @EnableMongoRepositories(basePackages = "com.wizkhalubernetes.repository")
 public class MongoConfig {
     @Value("${REMOTE_DB:false}")

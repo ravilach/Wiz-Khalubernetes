@@ -2,6 +2,7 @@
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/repository/QuoteJpaRepository.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/controller/QuoteController.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/model/Quote.java
+/Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/config/JpaConfig.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/controller/CustomErrorController.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/prometheus/MetricsConfig.java
 /Users/ravi/Documents/Internal/w/Wiz-Khalubernetes/backend/src/main/java/com/wizkhalubernetes/WizKhalubernetesApplication.java
