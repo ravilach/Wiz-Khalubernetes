@@ -64,7 +64,7 @@ A full-stack Spring Boot + React application for sharing your favorite Wiz Khali
 After building your Docker image, run:
 
 ```
-docker run -p 80:80 -p 8080:8080 <your-image-name>
+docker run -p 80:80 -p 8080:8080 wiz-khalubernetes:latest
 ```
 
 - Access the React UI at: [http://localhost/](http://localhost/)
