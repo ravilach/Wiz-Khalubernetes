@@ -1,6 +1,7 @@
 com/wizkhalubernetes/controller/QuoteController.class
 com/wizkhalubernetes/prometheus/MetricsConfig.class
 com/wizkhalubernetes/repository/QuoteRepository.class
+com/wizkhalubernetes/repository/QuoteJpaRepository.class
 com/wizkhalubernetes/WizKhalubernetesApplication.class
 com/wizkhalubernetes/config/MongoConfig.class
 com/wizkhalubernetes/model/Quote.class

@@ -1,21 +1,28 @@
 // Data model for Wiz Khalifa quotes stored in MongoDB
+
 package com.wizkhalubernetes.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "quotes")
 @Document(collection = "quotes")
 public class Quote {
     @Id
-    private String id;
+    @jakarta.persistence.Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String quote;
     private String timestamp;
     private String ip;
     private int quoteNumber;
 
     // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getQuote() { return quote; }
     public void setQuote(String quote) { this.quote = quote; }
     public String getTimestamp() { return timestamp; }

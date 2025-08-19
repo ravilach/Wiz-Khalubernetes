@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import com.wizkhalubernetes.model.Quote;
 import com.wizkhalubernetes.repository.QuoteRepository;
+import com.wizkhalubernetes.repository.QuoteJpaRepository;
 import org.springframework.dao.DataAccessResourceFailureException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
@@ -19,36 +20,61 @@ import java.util.Map;
 public class QuoteController {
     @Autowired(required = false)
     private QuoteRepository quoteRepository;
+    @Autowired(required = false)
+    private QuoteJpaRepository quoteJpaRepository;
+    @Autowired
+    private org.springframework.core.env.Environment env;
 
     /**
      * Adds a new quote and captures the user's IP address from the HTTP request.
      */
     @PostMapping("/quotes")
     public ResponseEntity<?> addQuote(@RequestBody Map<String, String> payload, HttpServletRequest request) {
-        if (quoteRepository == null) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(errorResponse("MongoDB connection unavailable at configured URL."));
-        }
-        try {
-            String quoteText = payload.get("quote");
-            Quote quote = new Quote();
-            quote.setQuote(quoteText);
-            quote.setTimestamp(Instant.now().toString());
-            // Get user's real IP address from headers or remote address
-            String ip = request.getHeader("X-Forwarded-For");
-            if (ip == null || ip.isEmpty()) {
-                ip = request.getRemoteAddr();
+        boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
+        if (useMongo) {
+            if (quoteRepository == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("MongoDB connection unavailable at configured URL."));
             }
-            quote.setIp(ip);
-            quote.setQuoteNumber((int) (quoteRepository.count() + 1));
-            quoteRepository.save(quote);
-            return ResponseEntity.ok(quote);
-        } catch (DataAccessResourceFailureException ex) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(errorResponse("MongoDB connection unavailable at configured URL."));
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorResponse("Unexpected error: " + ex.getMessage()));
+            try {
+                String quoteText = payload.get("quote");
+                Quote quote = new Quote();
+                quote.setQuote(quoteText);
+                quote.setTimestamp(Instant.now().toString());
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.isEmpty()) {
+                    ip = request.getRemoteAddr();
+                }
+                quote.setIp(ip);
+                quote.setQuoteNumber(getNextQuoteNumber());
+                Quote saved = quoteRepository.save(quote);
+                return ResponseEntity.ok(saved);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse("Failed to save quote: " + e.getMessage()));
+            }
+        } else {
+            if (quoteJpaRepository == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("H2/JPA repository unavailable."));
+            }
+            try {
+                String quoteText = payload.get("quote");
+                Quote quote = new Quote();
+                quote.setQuote(quoteText);
+                quote.setTimestamp(Instant.now().toString());
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.isEmpty()) {
+                    ip = request.getRemoteAddr();
+                }
+                quote.setIp(ip);
+                quote.setQuoteNumber(getNextQuoteNumber());
+                Quote saved = quoteJpaRepository.save(quote);
+                return ResponseEntity.ok(saved);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse("Failed to save quote: " + e.getMessage()));
+            }
         }
     }
 
@@ -106,6 +132,20 @@ public class QuoteController {
             return InetAddress.getLocalHost().getHostName();
         } catch (Exception e) {
             return "unknown";
+        }
+    }
+
+    /**
+     * Returns the next quote number based on the active DB.
+     */
+    private int getNextQuoteNumber() {
+        boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
+        if (useMongo && quoteRepository != null) {
+            return (int) (quoteRepository.count() + 1);
+        } else if (quoteJpaRepository != null) {
+            return (int) (quoteJpaRepository.count() + 1);
+        } else {
+            return 1;
         }
     }
 }
