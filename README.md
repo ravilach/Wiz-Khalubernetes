@@ -175,7 +175,7 @@ This file is included in the container for exercise/demo purposes.
 
 ---
 
-## 8. API Endpoints
+## 9. API Endpoints
 | Endpoint                      | Method | Description                                 |
 |-------------------------------|--------|---------------------------------------------|
 | `/api/quotes`                 | POST   | Submit a new Wiz Khalifa quote              |
@@ -186,6 +186,48 @@ This file is included in the container for exercise/demo purposes.
 
 ---
 
+## 10. How to Expose the Local App in Docker to Ngrok
+
+You can use [ngrok](https://ngrok.com/) to securely expose your local Wiz Khalubernetes app running in Docker to the internet for demos, testing, or remote access.
+
+### Step-by-Step
+
+1. **Start your Docker container**
+   ```sh
+   docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
+   ```
+   - This exposes the frontend on port 80 and backend API on port 8080.
+
+2. **Install ngrok**
+   - Download from https://ngrok.com/download
+   - Unzip and move to your PATH (e.g., `/usr/local/bin`)
+
+3. **Expose the frontend (port 80) with ngrok**
+   ```sh
+   ngrok http 80
+   ```
+   - This will give you a public HTTPS URL forwarding to your local frontend.
+
+4. **Expose the backend API (port 8080) with ngrok**
+   ```sh
+   ngrok http 8080
+   ```
+   - This will give you a public HTTPS URL forwarding to your backend API.
+
+5. **Share the ngrok URLs**
+   - Use the provided URLs to access your app from anywhere.
+   - Example output:
+     ```
+     Forwarding https://random-id.ngrok.io -> http://localhost:80
+     Forwarding https://another-id.ngrok.io -> http://localhost:8080
+     ```
+
+### Notes
+- You can run multiple ngrok tunnels at once for frontend and backend.
+- For advanced usage (custom domains, reserved URLs, auth), see the [ngrok docs](https://ngrok.com/docs).
+- Make sure your firewall allows incoming connections to the mapped ports.
+
+---
 
 ## Development Notes
 - Backend: Spring Boot (Java 17)
