@@ -25,10 +25,12 @@ const App: React.FC = () => {
   const [nodeInfo, setNodeInfo] = useState<any>(null);
   const [dbStatus, setDbStatus] = useState<{connected: string, type: string, message: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
     try {
       const res = await axios.post('/api/quotes', { quote });
       if ((res.data as any).error) {
@@ -42,6 +44,7 @@ const App: React.FC = () => {
       setError('Could not connect to backend or MongoDB.');
       setSubmittedQuote(null);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -99,21 +102,24 @@ const App: React.FC = () => {
         />
         <button
           type="submit"
+          disabled={loading || !quote.trim()}
           style={{
             padding: '12px 24px',
             borderRadius: 8,
             border: 'none',
-            background: '#fff',
-            color: 'rgb(2, 84, 236)',
+            background: loading ? '#e0e0e0' : '#fff',
+            color: loading ? '#888' : 'rgb(2, 84, 236)',
             fontWeight: 700,
             fontSize: 18,
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             fontFamily: 'Inter, sans-serif',
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            transition: 'background 0.2s',
+            transition: 'background 0.2s, color 0.2s',
           }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#f0f8ff')}
+          onMouseLeave={e => (e.currentTarget.style.background = loading ? '#e0e0e0' : '#fff')}
         >
-          Submit
+          {loading ? 'Submitting...' : 'Submit'}
         </button>
       </form>
       {error && (
@@ -153,6 +159,9 @@ const App: React.FC = () => {
             <span>DB Status: </span>
             <span>{dbStatus.connected === 'true' ? 'Connected' : 'Not Connected'} ({dbStatus.type})</span>
             <span style={{ marginLeft: 8, fontWeight: 400, fontSize: 14, color: '#fff' }}>{dbStatus.message}</span>
+            <div style={{ marginTop: 8, color: '#fff', fontWeight: 500 }}>
+              <strong>Connected DB:</strong> {dbStatus.type}
+            </div>
           </div>
         )}
         {nodeInfo ? (

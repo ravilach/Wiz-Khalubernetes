@@ -76,9 +76,10 @@ docker run -p 80:80 -p 8080:8080 wiz-khalubernetes
 
 - **Default:** Embedded H2 DB (no config needed)
 - **Remote MongoDB:**
-   - Set in `backend/src/main/resources/application.properties`:
+   - In `backend/src/main/resources/application.properties`, uncomment the line:
       ```properties
-      spring.data.mongodb.uri=mongodb://<username>:<password>@<host>:27017/<database>?authSource=admin
+      spring.data.mongodb.uri=${MONGODB_URI:mongodb://localhost:27017/dummy}
+      # Uncomment this property to use MongoDB (remote or local). Leave commented to use embedded H2 for local/dev.
       ```
    - Or set as environment variable:
       ```sh
@@ -135,6 +136,8 @@ kubectl exec -it <pod_name> -- sh
 cat wizexercise.txt
 ```
 
+This file is included in the container for exercise/demo purposes.
+
 ---
 
 ## 8. API Endpoints
@@ -148,18 +151,7 @@ cat wizexercise.txt
 
 ---
 
-Feel free to customize and extend Wiz Khalubernetes!
-   ```
-2. Exec into the pod shell:
-   ```
-   kubectl exec -it <pod_name> -- sh
-   ```
-3. View the file:
-   ```
-   cat wizexercise.txt
-   ```
 
-This file is included in the container for exercise/demo purposes.
 
 ## Development Notes
 - Backend: Spring Boot (Java 17)
