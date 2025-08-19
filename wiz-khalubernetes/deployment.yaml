@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wiz-khalubernetes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiz-khalubernetes
+  template:
+    metadata:
+      labels:
+        app: wiz-khalubernetes
+    spec:
+      containers:
+        - name: wiz-khalubernetes
+          image: <your-docker-image>
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: MONGODB_URI
+              value: "mongodb://<username>:<password>@<ec2-public-ip>:27017/<database>?authSource=admin"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          # Prometheus annotations for scraping metrics
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/path: "/actuator/prometheus"
+            prometheus.io/port: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wiz-khalubernetes-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: wiz-khalubernetes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

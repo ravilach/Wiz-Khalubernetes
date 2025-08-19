@@ -1,0 +1,160 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+// Import Inter font from Google Fonts
+const interFontUrl = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap';
+const injectFont = () => {
+  if (!document.getElementById('inter-font')) {
+    const link = document.createElement('link');
+    link.id = 'inter-font';
+    link.rel = 'stylesheet';
+    link.href = interFontUrl;
+    document.head.appendChild(link);
+  }
+};
+
+injectFont();
+
+
+const App: React.FC = () => {
+  const [quote, setQuote] = useState('');
+  const [submittedQuote, setSubmittedQuote] = useState<any>(null);
+  const [latestQuote, setLatestQuote] = useState<any>(null);
+  const [nodeInfo, setNodeInfo] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      const res = await axios.post('/api/quotes', { quote });
+      if ((res.data as any).error) {
+        setError((res.data as any).error);
+        setSubmittedQuote(null);
+      } else {
+        setSubmittedQuote(res.data);
+        setError(null);
+      }
+    } catch (err) {
+      setError('Could not connect to backend or MongoDB.');
+      setSubmittedQuote(null);
+    }
+  };
+
+  useEffect(() => {
+    axios.get('/api/nodeinfo').then((res: { data: any }) => setNodeInfo(res.data));
+    axios.get('/api/quotes/latest')
+      .then((res: { data: any }) => {
+        if (res.data && !(res.data as any).error) {
+          setLatestQuote(res.data);
+        } else {
+          setLatestQuote(null);
+        }
+      })
+      .catch(() => setLatestQuote(null));
+  }, []);
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: 32,
+        background: 'rgb(2, 84, 236)',
+        fontFamily: 'Inter, sans-serif',
+        color: '#fff',
+        boxSizing: 'border-box',
+      }}
+    >
+      <h1 style={{ fontWeight: 700, fontSize: 40, letterSpacing: 2, marginBottom: 16 }}>
+        Wiz Khalubernetes
+      </h1>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', gap: 12, marginBottom: 24 }}
+      >
+        <input
+          type="text"
+          value={quote}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuote(e.target.value)}
+          placeholder="Enter your favorite Wiz Khalifa quote"
+          style={{
+            width: 400,
+            padding: '12px 16px',
+            borderRadius: 8,
+            border: 'none',
+            fontSize: 18,
+            fontFamily: 'Inter, sans-serif',
+            color: '#222',
+            background: '#fff',
+            outline: 'none',
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: '12px 24px',
+            borderRadius: 8,
+            border: 'none',
+            background: '#fff',
+            color: 'rgb(2, 84, 236)',
+            fontWeight: 700,
+            fontSize: 18,
+            cursor: 'pointer',
+            fontFamily: 'Inter, sans-serif',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            transition: 'background 0.2s',
+          }}
+        >
+          Submit
+        </button>
+      </form>
+      {error && (
+        <div style={{ color: '#ffbaba', background: '#d8000c', padding: 12, borderRadius: 8, marginTop: 8, fontWeight: 500 }}>
+          {error}
+        </div>
+      )}
+      {submittedQuote && (
+        <div style={{ marginTop: 24, background: 'rgba(255,255,255,0.08)', padding: 20, borderRadius: 12 }}>
+          <h2 style={{ fontWeight: 700, fontSize: 28, marginBottom: 8 }}>Latest Quote</h2>
+          <p style={{ fontSize: 22, fontWeight: 500 }}>{submittedQuote.quote}</p>
+          <small>Timestamp: {submittedQuote.timestamp}</small><br/>
+          <small>IP: {submittedQuote.ip}</small><br/>
+          <small>Quote #: {submittedQuote.quoteNumber}</small>
+        </div>
+      )}
+      {!submittedQuote && !latestQuote && !error && (
+        <div style={{ marginTop: 24, color: '#fff', opacity: 0.7, fontSize: 20, fontWeight: 500 }}>
+          Drop your first quote!
+        </div>
+      )}
+      {latestQuote && !submittedQuote && (
+        <div style={{ marginTop: 24, background: 'rgba(255,255,255,0.08)', padding: 20, borderRadius: 12 }}>
+          <h2 style={{ fontWeight: 700, fontSize: 28, marginBottom: 8 }}>Latest Quote</h2>
+          <p style={{ fontSize: 22, fontWeight: 500 }}>{latestQuote.quote}</p>
+          <small>Timestamp: {latestQuote.timestamp}</small><br/>
+          <small>IP: {latestQuote.ip}</small><br/>
+          <small>Quote #: {latestQuote.quoteNumber}</small>
+        </div>
+      )}
+      <footer style={{ marginTop: 48, borderTop: '1px solid #fff', paddingTop: 16, opacity: 0.95 }}>
+        <h3 style={{ fontWeight: 700, fontSize: 22, marginBottom: 12 }}>Node/Application Info</h3>
+        {nodeInfo ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
+            <div><strong>Hostname:</strong> {nodeInfo.hostname}</div>
+            <div><strong>App:</strong> {nodeInfo.app}</div>
+            <div><strong>OS:</strong> {nodeInfo['os.name']} {nodeInfo['os.version']} ({nodeInfo['os.arch']})</div>
+            <div><strong>Available Processors:</strong> {nodeInfo.availableProcessors}</div>
+            <div><strong>Max Memory:</strong> {nodeInfo.maxMemoryMB} MB</div>
+            <div><strong>Total Memory:</strong> {nodeInfo.totalMemoryMB} MB</div>
+            <div><strong>Free Memory:</strong> {nodeInfo.freeMemoryMB} MB</div>
+            <div><strong>Timestamp:</strong> {nodeInfo.timestamp}</div>
+          </div>
+        ) : (
+          <div style={{ color: '#fff', opacity: 0.7 }}>Loading node info...</div>
+        )}
+      </footer>
+    </div>
+  );
+};
+
+export default App;
