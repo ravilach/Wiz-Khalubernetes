@@ -25,6 +25,7 @@ spec:
       containers:
         - name: wiz-khalubernetes
           image: <your-docker-image>
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
             - containerPort: 8080
