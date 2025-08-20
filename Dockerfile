@@ -39,6 +39,9 @@ COPY --from=base /app/wizexercise.txt wizexercise.txt
 RUN apt-get update && apt-get install -y nginx
 COPY --from=frontend-build /app/frontend/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Remove all other nginx configs except our own
+RUN find /etc/nginx/conf.d/ -type f ! -name 'default.conf' -delete
+RUN [ ! -d /etc/nginx/sites-enabled ] || rm -rf /etc/nginx/sites-enabled/*
 EXPOSE 8080 80
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV REMOTE_DB=false
