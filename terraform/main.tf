@@ -55,6 +55,9 @@ resource "aws_instance" "mongo_ec2" {
     sudo yum install -y mongodb-org
     sudo systemctl start mongod
     sudo systemctl enable mongod
+    # Bind MongoDB to 0.0.0.0 for remote access
+    sudo sed -i 's/^  bindIp: .*/  bindIp: 0.0.0.0/' /etc/mongod.conf
+    sudo systemctl restart mongod
     sudo systemctl status mongod
   EOF
 
