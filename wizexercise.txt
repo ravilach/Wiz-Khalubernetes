@@ -1,2 +1,0 @@
-Welcome to Wiz Khalubernetes!
-This is your exercise file for the Wiz Khalifa Kubernetes app.
