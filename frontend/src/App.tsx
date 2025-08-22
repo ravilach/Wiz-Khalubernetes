@@ -227,7 +227,10 @@ const App: React.FC = () => {
             </>
           ) : (
             <div style={{ color: '#fff', opacity: 0.7 }}>
-              Unable to load node info. Backend or database may be unavailable.
+              Unable to load node info. Backend or database may be unavailable.<br />
+              <span style={{ fontSize: 14, color: '#baffba' }}>
+                Retrying every 3 seconds...
+              </span>
             </div>
           )}
         </div>
