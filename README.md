@@ -5,6 +5,8 @@
 > docker run -p 80:80 -p 8080:8080 rlachhman/wiz-khalubernetes
 > ```
 > This will start both the frontend (on port 80) and backend (on port 8080) instantly.
+>
+> The app will be available at [http://localhost](http://localhost), served by nginx over port 80.
 
 
 ## CI/CD: Build and Push Docker Image with GitHub Actions
