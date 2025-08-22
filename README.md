@@ -1,3 +1,12 @@
+> **Tip:**  
+> To quickly run Wiz Khalubernetes locally, use the pre-built Docker image:  
+> 
+> ```sh
+> docker run -p 80:80 -p 8080:8080 rlachhman/wiz-khalubernetes
+> ```
+> This will start both the frontend (on port 80) and backend (on port 8080) instantly.
+
+
 ## CI/CD: Build and Push Docker Image with GitHub Actions
 
 This project includes a sample GitHub Actions workflow to build and push the Docker image to DockerHub on every push to `main`.
@@ -273,6 +282,20 @@ For more advanced queries and dashboarding, consider integrating with Grafana.
 - Frontend: React + TypeScript
 - MongoDB: Used for persistence
 - Prometheus: Metrics exposed at `/actuator/prometheus`
+
+---
+
+## 12. How to Change the Logging Level
+
+You can control the verbosity of application logs using the `logging.level` property in `backend/src/main/resources/application.properties`:
+
+```properties
+# Set log level for all classes under com.wizkhalubernetes
+logging.level.com.wizkhalubernetes=INFO
+# Levels: TRACE, DEBUG, INFO, WARN, ERROR
+```
+
+Change `INFO` to `DEBUG`, `WARN`, `ERROR`, or `TRACE` as needed to adjust the logging verbosity.
 
 ---
 
