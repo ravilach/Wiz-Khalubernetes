@@ -27,11 +27,18 @@ class WizKhalubernetesConfigSelector implements ImportSelector, EnvironmentAware
         }
     }
 }
+/**
+ * Main Spring Boot application class for Wiz Khalubernetes.
+ * Dynamically imports MongoDB or H2 config based on REMOTE_DB flag.
+ */
 @SpringBootApplication
 @Import(WizKhalubernetesConfigSelector.class)
 public class WizKhalubernetesApplication {
+    /**
+     * Application entry point.
+     * @param args command-line arguments
+     */
     public static void main(String[] args) {
         SpringApplication.run(WizKhalubernetesApplication.class, args);
     }
-
 }

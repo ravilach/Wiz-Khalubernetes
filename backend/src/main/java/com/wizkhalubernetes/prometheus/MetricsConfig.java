@@ -8,9 +8,17 @@ import org.springframework.context.annotation.Configuration;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 
+/**
+ * Prometheus metrics configuration for Spring Boot app.
+ * Provides beans for PrometheusMeterRegistry and MeterRegistry.
+ */
 @Configuration
 public class MetricsConfig {
 
+    /**
+     * Creates a PrometheusMeterRegistry bean for metrics collection.
+     * @return PrometheusMeterRegistry instance
+     */
     @Bean
     public PrometheusMeterRegistry prometheusMeterRegistry() {
         try {
@@ -21,6 +29,11 @@ public class MetricsConfig {
         }
     }
 
+    /**
+     * Creates a MeterRegistry bean using the PrometheusMeterRegistry.
+     * @param prometheusMeterRegistry Prometheus registry bean
+     * @return MeterRegistry instance
+     */
     @Bean
     public MeterRegistry meterRegistry(PrometheusMeterRegistry prometheusMeterRegistry) {
         if (prometheusMeterRegistry == null) {

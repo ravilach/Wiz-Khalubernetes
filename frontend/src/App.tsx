@@ -50,6 +50,7 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    // Initial load for all data
     axios.get('/api/nodeinfo')
       .then((res: { data: any }) => setNodeInfo(res.data))
       .catch(() => setNodeInfo(null));
@@ -68,12 +69,31 @@ const App: React.FC = () => {
     axios.get('/api/quotes')
       .then((res: { data: any[] }) => setAllQuotes(res.data))
       .catch(() => setAllQuotes([]));
+
+    // Poll nodeinfo and dbstatus every 5 seconds (no blink)
+    const interval = setInterval(() => {
+      axios.get('/api/nodeinfo')
+        .then((res: { data: any }) => setNodeInfo(res.data))
+        .catch(() => {});
+      axios.get('/api/dbstatus')
+        .then((res: { data: any }) => setDbStatus(res.data))
+        .catch(() => {});
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleDeleteQuote = async (id: number) => {
     try {
       await axios.delete(`/api/quotes/${id}`);
       setAllQuotes(quotes => quotes.filter(q => q.id !== id));
+      // If the deleted quote was the latest, clear latestQuote
+      if (latestQuote && latestQuote.id === id) {
+        setLatestQuote(null);
+      }
+      // If the deleted quote was the submittedQuote, clear submittedQuote
+      if (submittedQuote && submittedQuote.id === id) {
+        setSubmittedQuote(null);
+      }
     } catch (err) {
       setError('Failed to delete quote.');
     }

@@ -16,9 +16,15 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * REST API controller for quote operations and node/application info endpoints.
+ * Handles both MongoDB and H2 persistence based on REMOTE_DB flag.
+ */
 @RestController
 @RequestMapping("/api")
 public class QuoteController {
+    @Autowired
+    private com.wizkhalubernetes.prometheus.QuoteMetricsService quoteMetricsService;
     @Autowired(required = false)
     @org.springframework.beans.factory.annotation.Qualifier("mongoQuoteRepository")
     private QuoteMongoRepository quoteMongoRepository;
@@ -30,6 +36,10 @@ public class QuoteController {
 
     /**
      * Adds a new quote and captures the user's IP address from the HTTP request.
+     *
+     * @param payload JSON payload containing the quote text
+     * @param request HttpServletRequest to extract user IP
+     * @return ResponseEntity with saved quote or error details
      */
     @PostMapping("/quotes")
     public ResponseEntity<?> addQuote(@RequestBody Map<String, String> payload, HttpServletRequest request) {
@@ -52,6 +62,7 @@ public class QuoteController {
                 quote.setQuoteNumber(getNextQuoteNumber());
                 try {
                     QuoteMongo saved = quoteMongoRepository.save(quote);
+                    quoteMetricsService.incrementMongoCreate();
                     System.out.println("[INFO] Successfully saved quote to MongoDB: " + saved);
                     return ResponseEntity.ok(saved);
                 } catch (Exception e) {
@@ -81,6 +92,7 @@ public class QuoteController {
                 quote.setIp(ip);
                 quote.setQuoteNumber(getNextQuoteNumber());
                 QuoteH2 saved = quoteJpaRepository.save(quote);
+                quoteMetricsService.incrementH2Create();
                 return ResponseEntity.ok(saved);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -92,40 +104,64 @@ public class QuoteController {
 
     @GetMapping("/quotes/latest")
     public ResponseEntity<?> getLatestQuote() {
-    if (quoteMongoRepository == null) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(errorResponse("MongoDB connection unavailable at configured URL."));
-        }
-        try {
-            long count = quoteMongoRepository.count();
-            System.out.println("[INFO] MongoDB quote count: " + count);
-            if (count == 0) {
-                return ResponseEntity.ok().body(null);
+        boolean useMongo = Boolean.parseBoolean(env.getProperty("REMOTE_DB", "false"));
+        if (useMongo) {
+            if (quoteMongoRepository == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("MongoDB connection unavailable at configured URL."));
             }
-            QuoteMongo latest = null;
             try {
-                latest = quoteMongoRepository.findAll()
+                long count = quoteMongoRepository.count();
+                System.out.println("[INFO] MongoDB quote count: " + count);
+                if (count == 0) {
+                    return ResponseEntity.ok().body(null);
+                }
+                QuoteMongo latest = null;
+                try {
+                    latest = quoteMongoRepository.findAll()
+                        .stream()
+                        .max((a, b) -> Integer.compare(a.getQuoteNumber(), b.getQuoteNumber()))
+                        .orElse(null);
+                    quoteMetricsService.incrementMongoRead();
+                    System.out.println("[INFO] Fetched latest quote from MongoDB: " + latest);
+                } catch (Exception e) {
+                    System.err.println("[ERROR] Failed to fetch latest quote from MongoDB: " + e.getMessage());
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(errorResponse("Failed to fetch latest quote: " + e.getMessage()));
+                }
+                return ResponseEntity.ok(latest);
+            } catch (DataAccessResourceFailureException ex) {
+                System.err.println("[ERROR] MongoDB connection unavailable: " + ex.getMessage());
+                ex.printStackTrace();
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("MongoDB connection unavailable at configured URL."));
+            } catch (Exception ex) {
+                System.err.println("[ERROR] Unexpected error during MongoDB read: " + ex.getMessage());
+                ex.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse("Unexpected error: " + ex.getMessage()));
+            }
+        } else {
+            if (quoteJpaRepository == null) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(errorResponse("H2/JPA repository unavailable."));
+            }
+            try {
+                long count = quoteJpaRepository.count();
+                if (count == 0) {
+                    return ResponseEntity.ok().body(null);
+                }
+                QuoteH2 latest = quoteJpaRepository.findAll()
                     .stream()
                     .max((a, b) -> Integer.compare(a.getQuoteNumber(), b.getQuoteNumber()))
                     .orElse(null);
-                System.out.println("[INFO] Fetched latest quote from MongoDB: " + latest);
+                quoteMetricsService.incrementH2Read();
+                return ResponseEntity.ok(latest);
             } catch (Exception e) {
-                System.err.println("[ERROR] Failed to fetch latest quote from MongoDB: " + e.getMessage());
-                e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(errorResponse("Failed to fetch latest quote: " + e.getMessage()));
             }
-            return ResponseEntity.ok(latest);
-        } catch (DataAccessResourceFailureException ex) {
-            System.err.println("[ERROR] MongoDB connection unavailable: " + ex.getMessage());
-            ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(errorResponse("MongoDB connection unavailable at configured URL."));
-        } catch (Exception ex) {
-            System.err.println("[ERROR] Unexpected error during MongoDB read: " + ex.getMessage());
-            ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorResponse("Unexpected error: " + ex.getMessage()));
         }
     }
 
@@ -141,6 +177,7 @@ public class QuoteController {
                     .body(errorResponse("MongoDB connection unavailable at configured URL."));
             }
             try {
+                quoteMetricsService.incrementMongoRead();
                 return ResponseEntity.ok(quoteMongoRepository.findAll());
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -152,6 +189,7 @@ public class QuoteController {
                     .body(errorResponse("H2/JPA repository unavailable."));
             }
             try {
+                quoteMetricsService.incrementH2Read();
                 return ResponseEntity.ok(quoteJpaRepository.findAll());
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -172,7 +210,8 @@ public class QuoteController {
                     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(errorResponse("MongoDB connection unavailable at configured URL."));
                 }
-                quoteMongoRepository.deleteById(Long.parseLong(id));
+                quoteMongoRepository.deleteById(id);
+                quoteMetricsService.incrementMongoDelete();
                 return ResponseEntity.ok().body("Deleted");
             } else {
                 if (quoteJpaRepository == null) {
@@ -180,6 +219,7 @@ public class QuoteController {
                         .body(errorResponse("H2/JPA repository unavailable."));
                 }
                 quoteJpaRepository.deleteById(Long.parseLong(id));
+                quoteMetricsService.incrementH2Delete();
                 return ResponseEntity.ok().body("Deleted");
             }
         } catch (Exception e) {

@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for friendly error responses.
+ * Handles uncaught exceptions and returns JSON error details.
+ */
 @ControllerAdvice
 @RestController
 public class GlobalExceptionHandler {
