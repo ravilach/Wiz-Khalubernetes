@@ -11,6 +11,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom error controller for handling /error endpoint.
@@ -18,6 +20,8 @@ import java.util.Map;
  */
 @RestController
 public class CustomErrorController implements ErrorController {
+    private static final Logger logger = LoggerFactory.getLogger(CustomErrorController.class);
+
     @Autowired
     private ErrorAttributes errorAttributes;
 
@@ -28,6 +32,7 @@ public class CustomErrorController implements ErrorController {
      */
     @RequestMapping("/error")
     public ResponseEntity<Map<String, Object>> handleError(WebRequest webRequest) {
+        logger.debug("CustomErrorController.handleError called for /error endpoint");
         Map<String, Object> errors = errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.defaults());
         errors.put("message", "Something went wrong. Please check your request or try again later.");
         return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
