@@ -239,6 +239,35 @@ You can use [ngrok](https://ngrok.com/) to securely expose your local Wiz Khalub
 
 ---
 
+## 11. Sample Prometheus Queries
+
+You can use the following Prometheus queries to monitor Wiz Khalubernetes metrics exposed at `/actuator/prometheus`:
+
+- **Total quotes created in MongoDB:**
+  ```prometheus
+  sum(db_mongo_create_total)
+  ```
+- **Total quotes created in H2:**
+  ```prometheus
+  sum(db_h2_create_total)
+  ```
+- **Total quotes deleted in MongoDB:**
+  ```prometheus
+  sum(db_mongo_delete_total)
+  ```
+- **JVM memory usage (MB):**
+  ```prometheus
+  jvm_memory_used_bytes / 1024 / 1024
+  ```
+- **Node health (custom metric):**
+  ```prometheus
+  node_health_free_memory_mb
+  ```
+
+For more advanced queries and dashboarding, consider integrating with Grafana.
+
+---
+
 ## Development Notes
 - Backend: Spring Boot (Java 17)
 - Frontend: React + TypeScript
