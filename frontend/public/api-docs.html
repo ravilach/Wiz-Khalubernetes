@@ -57,6 +57,31 @@
     <div class="desc">Get current DB connection status/type</div>
     <div class="response">Response: <pre>{ "type": "H2", "connected": "true", "message": "Connected to H2" }</pre></div>
   </div>
+  <h2>Prometheus Metrics & Example Queries</h2>
+  <div class="endpoint">
+    <span class="method">GET</span>
+    <span class="url">/actuator/prometheus</span>
+    <div class="desc">Exposes application and database metrics in Prometheus format.</div>
+    <pre>
+# Example Prometheus queries:
+
+# Total quotes created in MongoDB
+sum(db_mongo_create_total)
+
+# Total quotes created in H2
+sum(db_h2_create_total)
+
+# Total quotes deleted in MongoDB
+sum(db_mongo_delete_total)
+
+# JVM memory usage (MB)
+jvm_memory_used_bytes / 1024 / 1024
+
+# Node health (custom)
+node_health_free_memory_mb
+    </pre>
+    <div class="response">Response: <pre>Plain text metrics for Prometheus scraping</pre></div>
+  </div>
   <div style="margin-top: 48px; color: #888; font-size: 0.95rem;">For more details, see the <a href="https://github.com/ravilach/Wiz-Khalubernetes">project README</a>.</div>
 </body>
 </html>
